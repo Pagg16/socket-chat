@@ -1,13 +1,15 @@
 import Chats from "../Chats/Chats";
-import HomePage from "../HomePage/HomePage";
+import Login from "../Login/Login";
 import "./app.css";
-import { Route } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 
 function App() {
   return (
     <div className="app">
-      <Route exact path="/" element={<HomePage />} />
-      <Route path="/chat" element={<Chats />} />
+      <Routes>
+        <Route exact path="/" element={<Login />} />
+        <Route path="/chat" element={<Chats />} />
+      </Routes>
     </div>
   );
 }

@@ -1,16 +1,20 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./loginSingUp.css";
+import { auth, singUp } from "../../api/api";
+import { useNavigate } from "react-router-dom";
 
-function LoginSingUp() {
+function LoginSingUp({ setPopup }) {
+  const navigate = useNavigate();
+
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [registrationType, setRegistrationType] = useState(false);
+  const [isLoaderButton, setIsLoaderButto] = useState(false);
 
   const [userData, setUserData] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
-    pictureLink: "",
     pictureFile: "",
     pictureLinkFile: "",
   });
@@ -30,9 +34,90 @@ function LoginSingUp() {
   function sendUserData() {
     if (registrationType) {
       const { name, email, password, confirmPassword, pictureLink } = userData;
+
+      if (!name || !email || !password || !confirmPassword) {
+        setPopup((state) => ({
+          ...state,
+          text: "left empty field",
+          isVisible: true,
+        }));
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        setPopup((state) => ({
+          ...state,
+          text: "password mismatch",
+          isVisible: true,
+        }));
+        return;
+      }
+
+      setIsLoaderButto(true);
+      singUp(name, email, password, confirmPassword, pictureLink)
+        .then((res) => {
+          res.json();
+        })
+        .then((res) => {
+          localStorage.setItem("userDate", res);
+          navigate("/chats");
+        })
+        .catch((e) => {
+          setPopup((state) => ({
+            ...state,
+            text: e,
+            isVisible: true,
+          }));
+        })
+        .finally(() => {
+          setIsLoaderButto(false);
+        });
     } else {
       const { email, password } = userData;
+
+      if (!email || !password) {
+        setPopup((state) => ({
+          ...state,
+          text: "left empty field",
+          isVisible: true,
+        }));
+        return;
+      }
+
+      setIsLoaderButto(true);
+      auth(email, password)
+        .then((res) => {
+          res.json();
+        })
+        .then((res) => {
+          navigate("/chats");
+        })
+        .catch((e) => {
+          setPopup((state) => ({
+            ...state,
+            text: e,
+            isVisible: true,
+          }));
+        })
+        .finally(() => {
+          setIsLoaderButto(false);
+        });
     }
+  }
+
+  function isImage(file) {
+    const type = file.type.split("/", 1)[0];
+    if (type === "image") {
+      return true;
+    }
+
+    setPopup((state) => ({
+      ...state,
+      text: "file must be an image",
+      isVisible: true,
+    }));
+
+    return false;
   }
 
   return (
@@ -66,12 +151,21 @@ function LoginSingUp() {
                 Name
               </label>
               <input
+                min={2}
+                max={30}
                 required
                 className="login__input"
                 id="name"
                 name="name"
                 placeholder="Enter Your Name"
                 type="name"
+                value={userData.name}
+                onChange={(e) =>
+                  setUserData((state) => ({
+                    ...state,
+                    [e.target.name]: e.target.value,
+                  }))
+                }
               />
             </>
           )}
@@ -79,12 +173,20 @@ function LoginSingUp() {
             Email
           </label>
           <input
+            min={2}
             required
             className="login__input"
             id="email"
             name="email"
             placeholder="Enter Email"
             type="text"
+            value={userData.email}
+            onChange={(e) =>
+              setUserData((state) => ({
+                ...state,
+                [e.target.name]: e.target.value,
+              }))
+            }
           />
 
           <label className="login__label" htmlFor="Password">
@@ -92,12 +194,20 @@ function LoginSingUp() {
           </label>
           <div className="login__input-password">
             <input
+              min={2}
               required
               className="login__input"
               id="password"
               name="password"
               placeholder="password"
               type={`${passwordVisible ? "text" : "password"}`}
+              value={userData.password}
+              onChange={(e) =>
+                setUserData((state) => ({
+                  ...state,
+                  [e.target.name]: e.target.value,
+                }))
+              }
             />
             <button
               className="logit__show-password"
@@ -121,12 +231,20 @@ function LoginSingUp() {
               </label>
               <div className="login__input-password">
                 <input
+                  min={2}
                   required
                   className="login__input"
                   id="confirmPassword"
                   name="confirmPassword"
                   placeholder="Confirm Password"
                   type={`${passwordVisible ? "text" : "password"}`}
+                  value={userData.confirmPassword}
+                  onChange={(e) =>
+                    setUserData((state) => ({
+                      ...state,
+                      [e.target.name]: e.target.value,
+                    }))
+                  }
                 />
                 <button
                   className="logit__show-password"
@@ -153,14 +271,23 @@ function LoginSingUp() {
                   name="picture"
                   placeholder="picture"
                   type="file"
-                  onChange={(e) =>
-                    setUserData((state) => ({
-                      ...state,
-                      pictureLink: e.target.value,
-                      pictureFile: e.target.files[0],
-                      pictureLinkFile: URL.createObjectURL(e.target.files[0]),
-                    }))
-                  }
+                  onChange={(e) => {
+                    if (isImage(e.target.files[0])) {
+                      setUserData((state) => ({
+                        ...state,
+                        pictureFile: e.target.files[0],
+                        pictureLinkFile: URL.createObjectURL(e.target.files[0]),
+                      }));
+                    } else {
+                      const defaultText = new File(
+                        ["Файл не выбран"],
+                        "Файл не выбран"
+                      );
+                      const dataTransfer = new DataTransfer();
+                      dataTransfer.items.add(defaultText);
+                      pictureInput.current.files = dataTransfer.files;
+                    }
+                  }}
                 />
 
                 {!!userData.pictureFile && (
@@ -172,9 +299,17 @@ function LoginSingUp() {
               </div>
             </>
           )}
-          <button className="login__login-bts" onClick={sendUserData}>{`${
-            registrationType ? "Sing Up" : "Login"
-          }`}</button>
+          <button
+            className="login__login-bts"
+            disabled={isLoaderButton}
+            onClick={sendUserData}
+          >
+            {isLoaderButton ? (
+              <span className="login__loader"></span>
+            ) : (
+              `${registrationType ? "Sing Up" : "Login"}`
+            )}
+          </button>
         </div>
       </div>
     </div>

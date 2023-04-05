@@ -1,0 +1,29 @@
+.popup {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translate(-50%, -150%);
+  width: 20%;
+  min-height: 100px;
+  background-color: rgba(0, 230, 153, 0.877);
+  border-radius: 1rem;
+  transition: all 0.2s linear;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 25px;
+}
+
+.popup_visible {
+  transform: translate(-50%, 0);
+}
+
+.popup__close {
+  position: absolute;
+  right: 0;
+  top: 0;
+  border-radius: 1rem;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+}

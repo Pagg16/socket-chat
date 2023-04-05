@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import getChats from "../../api/api";
+import { getChats } from "../../api/api";
 
 function Chats() {
   const [chats, setChats] = useState([]);

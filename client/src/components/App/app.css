@@ -8,4 +8,8 @@
   min-height: 100vh;
   display: flex;
   background-color: rgb(92, 92, 92);
+  background-image: url("../../images/background.jpg");
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }

@@ -1,16 +1,12 @@
 .login {
   display: flex;
   align-items: center;
-  justify-content: center;
   width: 100vw;
   height: 100vh;
-  transition: all 1s linear;
-  position: relative;
+  flex-direction: column;
 }
 
 .login__conrainer {
-  position: absolute;
-  top: 20%;
   width: 600px;
   background-color: rgb(255, 255, 255);
   border-radius: 1rem;
@@ -18,6 +14,21 @@
   display: flex;
   align-items: center;
   flex-direction: column;
+  margin-top: 10px;
+}
+
+.login__title-container {
+  margin-top: calc(100vh - 85vh);
+  min-height: 100px;
+  width: 600px;
+  background-color: rgb(255, 255, 255);
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-family: "Raleway", sans-serif;
+  background-color: pink;
 }
 
 .login__types-btns {
@@ -78,6 +89,23 @@
   padding: 6px;
 }
 
+.login__picture-input {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  min-height: 100px;
+}
+
+.ligin__picture-container {
+  border-radius: 10rem;
+  border: 1px dotted gray;
+  min-width: 100px;
+  min-height: 100px;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
 .login__login-bts {
   width: 100%;
   margin-top: 30px;
@@ -91,4 +119,32 @@
 
 .login__login-bts:active {
   background-color: gray;
+}
+
+.login__title {
+  color: rgba(225, 225, 225, 0.01);
+  background-image: url("https://images.unsplash.com/photo-1499195333224-3ce974eecb47?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=2cf549433129d4227d1879347b9e78ce&auto=format&fit=crop&w=1248&q=80");
+  background-repeat: repeat;
+  -webkit-background-clip: text;
+  animation: animate 15s ease-in-out infinite;
+  text-align: center;
+  text-transform: uppercase;
+  font-weight: 900;
+  font-size: 70px;
+}
+
+@keyframes animate {
+  0%,
+  100% {
+    background-position: left top;
+  }
+  25% {
+    background-position: right bottom;
+  }
+  50% {
+    background-position: left bottom;
+  }
+  75% {
+    background-position: right top;
+  }
 }

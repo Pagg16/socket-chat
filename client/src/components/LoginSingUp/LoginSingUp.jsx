@@ -6,6 +6,14 @@ import { useNavigate } from "react-router-dom";
 function LoginSingUp({ setPopup }) {
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+
+    if (userInfo) {
+      // navigate("/chats");
+    }
+  }, [navigate]);
+
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [registrationType, setRegistrationType] = useState(false);
   const [isLoaderButton, setIsLoaderButto] = useState(false);
@@ -54,18 +62,17 @@ function LoginSingUp({ setPopup }) {
       }
 
       setIsLoaderButto(true);
-      singUp(name, email, password, confirmPassword, pictureLink)
+      singUp(name, email, password, pictureLink)
         .then((res) => {
-          res.json();
+          // localStorage.setItem("userInfo", res);
+          console.log(res);
+          // navigate("/chats");
         })
-        .then((res) => {
-          localStorage.setItem("userDate", res);
-          navigate("/chats");
-        })
+
         .catch((e) => {
           setPopup((state) => ({
             ...state,
-            text: e,
+            text: e.message,
             isVisible: true,
           }));
         })
@@ -87,15 +94,13 @@ function LoginSingUp({ setPopup }) {
       setIsLoaderButto(true);
       auth(email, password)
         .then((res) => {
-          res.json();
-        })
-        .then((res) => {
-          navigate("/chats");
+          // navigate("/chats");
+          console.log(res);
         })
         .catch((e) => {
           setPopup((state) => ({
             ...state,
-            text: e,
+            text: e.message,
             isVisible: true,
           }));
         })

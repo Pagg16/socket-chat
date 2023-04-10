@@ -6,7 +6,7 @@ function Popup({ popup, setPopup }) {
     if (popup.isVisible) {
       const timer = setTimeout(() => {
         setPopup((state) => ({ ...state, isVisible: false }));
-      }, 5000);
+      }, 4000);
       return () => clearTimeout(timer);
     }
   }, [popup.isVisible]);

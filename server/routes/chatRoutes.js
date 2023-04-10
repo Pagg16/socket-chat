@@ -10,11 +10,11 @@ const {
 } = require("../controllers/chatController");
 const chatRoutes = express.Router();
 
-router.route("/").post(protect, accessChat);
-router.route("/").get(protect, fetchChats);
-router.route("/group").post(protect, createGroupChat);
-router.route("/rename").put(protect, renameGroup);
-router.route("/groupremove").put(protect, groupRemove);
-router.route("/groupadd").put(protect, groupAdd);
+chatRoutes.route("/").post(protect, accessChat);
+chatRoutes.route("/").get(protect, fetchChats);
+chatRoutes.route("/group").post(protect, createGroupChat);
+chatRoutes.route("/rename").put(protect, renameGroup);
+chatRoutes.route("/groupremove").put(protect, groupRemove);
+chatRoutes.route("/groupadd").put(protect, groupAdd);
 
 module.exports = chatRoutes;

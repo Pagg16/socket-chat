@@ -1,22 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { getChats } from "../../api/api";
+import { ChatState } from "../../context/chatProvider";
+import SidePanel from "../SidePanel/SidePanel";
+import MyChats from "../MyChats/MyChats";
+import ChatBox from "../ChatBox/ChatBox";
 
 function Chats() {
-  const [chats, setChats] = useState([]);
-
-  useEffect(() => {
-    getChats()
-      .then((res) => res.json())
-      .then((res) => {
-        setChats(res);
-      });
-  }, []);
+  const { user } = ChatState();
 
   return (
     <div>
-      {chats.map((chat) => (
-        <div key={chat._id}>{chat.chatName}</div>
-      ))}
+      {user && <SidePanel />}
+      <div>
+        {user && <MyChats />}
+        {user && <ChatBox />}
+      </div>
     </div>
   );
 }

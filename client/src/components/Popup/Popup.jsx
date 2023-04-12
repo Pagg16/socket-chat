@@ -13,7 +13,7 @@ function Popup({ popup, setPopup }) {
 
   return (
     <div className={`popup ${popup.isVisible && "popup_visible"}`}>
-      <p>{popup.text}</p>
+      <p className="popup__text">{popup.text}</p>
       <button
         className="popup__close"
         onClick={() => setPopup((state) => ({ ...state, isVisible: false }))}

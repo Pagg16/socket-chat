@@ -1,62 +1,73 @@
 const asyncHandler = require("express-async-handler");
 const generateToken = require("../config/generateToken");
+const { validationResult } = require("express-validator");
 const User = require("../scheme/userschema");
+const bcrypt = require("bcrypt");
+const { validationResult } = require("express-validator");
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password, pictureLink } = req.body;
-
-  if (!name || !email || !password) {
-    res.status(400);
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
   }
 
-  const userExist = await User.findOne({ email });
+  const { name, email, password } = req.body;
 
-  if (userExist) {
-    res.status(400);
-  }
-
-  const user = await User.create({
-    name,
-    email,
-    password,
-    pictureLink,
-  });
-
+  let user = await User.findOne({ email });
   if (user) {
-    res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      pic: user.pictureLink,
-      token: generateToken(user._id),
-    });
-  } else {
-    res.status(400);
+    return res
+      .status(409)
+      .json({ message: "User with this email already exists" });
   }
+
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+
+  user = new User({ name, email, password: hashedPassword });
+  await user.save();
+
+  res.status(201).json({
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    token: generateToken(user._id),
+  });
 });
 
 const authUser = asyncHandler(async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
+
   const { email, password } = req.body;
 
   const user = await User.findOne({ email });
+  const passwordCompare = await bcrypt.compare(user.password, password);
 
-  if (user && (await user.matchPassword(password))) {
-    res.status(400);
+  if (user && passwordCompare) {
+    res.status(400).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      token: generateToken(user._id),
+    });
+  } else {
+    res.status(401).json("User not found");
   }
 });
 
 const allUsers = asyncHandler(async (req, res) => {
-  const search = req.query.search
-    ? {
-        $or: [
-          { name: { $regex: req.query.search, $options: "i" } },
-          { email: { $regex: req.query.search, $options: "i" } },
-        ],
-      }
-    : {};
+  const { query } = req.query;
 
-  const users = await User.find(search).find({ _id: { $ne: req.user._id } });
-  res.send(users);
+  const users = await User.find({
+    $or: [
+      { name: { $regex: query, $options: "i" } },
+      { email: { $regex: query, $options: "i" } },
+    ],
+  });
+
+  res.json(users);
 });
 
 module.exports = { registerUser, authUser, allUsers };

@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import "./loginSingUp.css";
 import { auth, singUp } from "../../api/api";
 import { useNavigate } from "react-router-dom";
+import { sendUserData } from "./sendUserDate";
+import { validationInput } from "./validationInput";
 
 function LoginSingUp({ setPopup }) {
   const navigate = useNavigate();
@@ -17,12 +19,25 @@ function LoginSingUp({ setPopup }) {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [registrationType, setRegistrationType] = useState(false);
   const [isLoaderButton, setIsLoaderButto] = useState(false);
+  const [disabledButton, setDisabledButton] = useState(true);
 
   const [userData, setUserData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
+    name: {
+      value: "",
+      error: "",
+    },
+    email: {
+      value: "",
+      error: "",
+    },
+    password: {
+      value: "",
+      error: "",
+    },
+    confirmPassword: {
+      value: "",
+      error: "",
+    },
     pictureFile: "",
     pictureLinkFile: "",
   });
@@ -39,76 +54,23 @@ function LoginSingUp({ setPopup }) {
     }
   }, [userData.pictureLinkFile, registrationType]);
 
-  function sendUserData() {
-    if (registrationType) {
-      const { name, email, password, confirmPassword, pictureLink } = userData;
+  useEffect(() => {
+    const errors = !registrationType
+      ? !!userData.email.error || !!userData.password.error
+      : !!Object.values(userData).find(
+          (input) => !!!(input.value && input.value.trim())
+        );
 
-      if (!name || !email || !password || !confirmPassword) {
-        setPopup((state) => ({
-          ...state,
-          text: "left empty field",
-          isVisible: true,
-        }));
-        return;
-      }
+    const textError = !registrationType
+      ? !!!userData.email.value || !!!userData.password.value
+      : !!Object.values(userData).find((input) => !!input.error);
 
-      if (password !== confirmPassword) {
-        setPopup((state) => ({
-          ...state,
-          text: "password mismatch",
-          isVisible: true,
-        }));
-        return;
-      }
-
-      setIsLoaderButto(true);
-      singUp(name, email, password, pictureLink)
-        .then((res) => {
-          // localStorage.setItem("userInfo", res);
-          console.log(res);
-          // navigate("/chats");
-        })
-
-        .catch((e) => {
-          setPopup((state) => ({
-            ...state,
-            text: e.message,
-            isVisible: true,
-          }));
-        })
-        .finally(() => {
-          setIsLoaderButto(false);
-        });
+    if (errors || textError) {
+      return setDisabledButton(true);
     } else {
-      const { email, password } = userData;
-
-      if (!email || !password) {
-        setPopup((state) => ({
-          ...state,
-          text: "left empty field",
-          isVisible: true,
-        }));
-        return;
-      }
-
-      setIsLoaderButto(true);
-      auth(email, password)
-        .then((res) => {
-          // navigate("/chats");
-          console.log(res);
-        })
-        .catch((e) => {
-          setPopup((state) => ({
-            ...state,
-            text: e.message,
-            isVisible: true,
-          }));
-        })
-        .finally(() => {
-          setIsLoaderButto(false);
-        });
+      return setDisabledButton(false);
     }
-  }
+  }, [userData, registrationType]);
 
   function isImage(file) {
     const type = file.type.split("/", 1)[0];
@@ -156,21 +118,16 @@ function LoginSingUp({ setPopup }) {
                 Name
               </label>
               <input
-                min={2}
-                max={30}
                 required
-                className="login__input"
+                className={`login__input ${
+                  !!userData.name.error && "login__input_error"
+                }`}
                 id="name"
                 name="name"
                 placeholder="Enter Your Name"
                 type="name"
-                value={userData.name}
-                onChange={(e) =>
-                  setUserData((state) => ({
-                    ...state,
-                    [e.target.name]: e.target.value,
-                  }))
-                }
+                value={userData.name.value}
+                onChange={(e) => validationInput(e, setUserData)}
               />
             </>
           )}
@@ -180,18 +137,15 @@ function LoginSingUp({ setPopup }) {
           <input
             min={2}
             required
-            className="login__input"
+            className={`login__input ${
+              !!userData.email.error && "login__input_error"
+            }`}
             id="email"
             name="email"
             placeholder="Enter Email"
             type="text"
-            value={userData.email}
-            onChange={(e) =>
-              setUserData((state) => ({
-                ...state,
-                [e.target.name]: e.target.value,
-              }))
-            }
+            value={userData.email.value}
+            onChange={(e) => validationInput(e, setUserData)}
           />
 
           <label className="login__label" htmlFor="Password">
@@ -201,18 +155,15 @@ function LoginSingUp({ setPopup }) {
             <input
               min={2}
               required
-              className="login__input"
+              className={`login__input ${
+                !!userData.password.error && "login__input_error"
+              }`}
               id="password"
               name="password"
               placeholder="password"
               type={`${passwordVisible ? "text" : "password"}`}
-              value={userData.password}
-              onChange={(e) =>
-                setUserData((state) => ({
-                  ...state,
-                  [e.target.name]: e.target.value,
-                }))
-              }
+              value={userData.password.value}
+              onChange={(e) => validationInput(e, setUserData)}
             />
             <button
               className="logit__show-password"
@@ -238,18 +189,15 @@ function LoginSingUp({ setPopup }) {
                 <input
                   min={2}
                   required
-                  className="login__input"
+                  className={`login__input ${
+                    !!userData.confirmPassword.error && "login__input_error"
+                  }`}
                   id="confirmPassword"
                   name="confirmPassword"
                   placeholder="Confirm Password"
                   type={`${passwordVisible ? "text" : "password"}`}
-                  value={userData.confirmPassword}
-                  onChange={(e) =>
-                    setUserData((state) => ({
-                      ...state,
-                      [e.target.name]: e.target.value,
-                    }))
-                  }
+                  value={userData.confirmPassword.value}
+                  onChange={(e) => validationInput(e, setUserData)}
                 />
                 <button
                   className="logit__show-password"
@@ -305,9 +253,21 @@ function LoginSingUp({ setPopup }) {
             </>
           )}
           <button
-            className="login__login-bts"
-            disabled={isLoaderButton}
-            onClick={sendUserData}
+            className={`login__login-bts ${
+              disabledButton && "login__login-bts_disabled"
+            }`}
+            disabled={isLoaderButton || disabledButton}
+            onClick={() =>
+              sendUserData(
+                registrationType,
+                userData,
+                setPopup,
+                setIsLoaderButto,
+                singUp,
+                navigate,
+                auth
+              )
+            }
           >
             {isLoaderButton ? (
               <span className="login__loader"></span>
@@ -316,6 +276,12 @@ function LoginSingUp({ setPopup }) {
             )}
           </button>
         </div>
+        <span className="login__error">
+          {(!registrationType
+            ? userData.email.error || userData.password.error
+            : Object.values(userData).find((input) => !!input.error)?.error) ||
+            (disabledButton && "Все поля должны быть заполнены")}
+        </span>
       </div>
     </div>
   );

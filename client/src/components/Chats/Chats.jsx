@@ -6,7 +6,8 @@ import MyChats from "../MyChats/MyChats";
 import ChatBox from "../ChatBox/ChatBox";
 
 function Chats() {
-  const { user } = ChatState();
+  // const { user } = ChatState();
+  const user = true;
 
   return (
     <div>

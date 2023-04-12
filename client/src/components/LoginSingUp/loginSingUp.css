@@ -89,6 +89,21 @@
   padding: 6px;
 }
 
+.login__input_error {
+  outline-color: #ff0000;
+  border-color: #ff0000;
+  box-shadow: none;
+}
+
+.login__error {
+  color: #9b0000;
+  padding: 10px;
+  border-radius: 5px;
+  transition: opacity 0.3s ease-in-out;
+  width: 100%;
+  font-size: 15px;
+}
+
 .login__picture-input {
   display: flex;
   align-items: center;
@@ -115,6 +130,10 @@
   border: none;
   cursor: pointer;
   color: white;
+}
+
+.login__login-bts_disabled {
+  background-color: gray;
 }
 
 .login__login-bts:active {

@@ -4,6 +4,7 @@ const { validationResult } = require("express-validator");
 const User = require("../scheme/userschema");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const path = require("path");
 
 const registerUser = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
@@ -11,16 +12,23 @@ const registerUser = asyncHandler(async (req, res) => {
     return res.status(401).json({ errors: errors.array() });
   }
 
-  const name = req.body.name;
-  const email = req.body.email;
-  const password = req.body.password;
-  const picture = req.body.file;
+  const { name, email, password } = req.body;
+
+  const pictureFile = req.file;
 
   let user = await User.findOne({ email });
   if (user) {
     return res
       .status(409)
       .json({ message: "User with this email already exists" });
+  }
+  let userImage = null;
+
+  if (!!pictureFile) {
+    userImage = {
+      data: pictureFile.buffer,
+      contentType: pictureFile.mimetype,
+    };
   }
 
   const salt = await bcrypt.genSalt(10);
@@ -30,30 +38,17 @@ const registerUser = asyncHandler(async (req, res) => {
     name,
     email,
     password: hashedPassword,
-    picture,
+    image: userImage,
   });
 
   await user.save();
 
-  const filePath = path.join(
-    __dirname,
-    "server",
-    "images",
-    "default-picture.jpg"
-  );
-
-  res.sendFile("../images/default-picture.jpg", {}, (err) => {
-    if (err) {
-      console.log(err);
-      res.status(err.status).end();
-    } else {
-      res.status(201).json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        token: generateToken(user._id),
-      });
-    }
+  res.status(201).json({
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    image: user.image,
+    token: generateToken(user._id),
   });
 });
 
@@ -65,7 +60,7 @@ const authUser = asyncHandler(async (req, res) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const user = await User.findById(decoded.id).select("-password");
 
-      res.status(200).json({
+      res.status(201).json({
         _id: user._id,
         name: user.name,
         email: user.email,

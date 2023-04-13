@@ -17,7 +17,7 @@ const router = express.Router();
 
 router.post(
   "/",
-  upload.none(),
+  upload.single("pictureFile"),
   validateRequest(registerUserValidations),
   registerUser
 );

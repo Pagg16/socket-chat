@@ -1,4 +1,6 @@
+import { useNavigate } from "react-router-dom";
 import { updateTokenAndCreateAxiosInstance } from "../../api/api";
+import { resSetUser } from "../../utils/resSetUser";
 
 export function sendUserData(
   registrationType,
@@ -7,8 +9,7 @@ export function sendUserData(
   setIsLoaderButto,
   singUp,
   navigate,
-  auth,
-  setUser
+  auth
 ) {
   const name = userData.name.value;
   const email = userData.email.value;
@@ -38,11 +39,7 @@ export function sendUserData(
     setIsLoaderButto(true);
     singUp(name, email, password, pictureFile)
       .then((res) => {
-        updateTokenAndCreateAxiosInstance();
-        setUser(res.data);
-        localStorage.setItem("jwt", res.data.token);
-        console.log(res.data);
-        navigate("/chats");
+        resSetUser(res, navigate);
       })
 
       .catch((e) => {
@@ -69,10 +66,7 @@ export function sendUserData(
     setIsLoaderButto(true);
     auth(email, password)
       .then((res) => {
-        updateTokenAndCreateAxiosInstance();
-        setUser(res.data);
-        localStorage.setItem("jwt", res.data.token);
-        navigate("/chats");
+        resSetUser(res, navigate);
       })
       .catch((e) => {
         console.log(e);

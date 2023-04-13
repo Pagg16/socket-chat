@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { createContext, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth, updateTokenAndCreateAxiosInstance } from "../api/api";
+import { resSetUser } from "../utils/resSetUser";
 
 export const UserContext = createContext();
 
@@ -17,9 +18,7 @@ const UserProvider = ({ children }) => {
       updateTokenAndCreateAxiosInstance();
       auth()
         .then((res) => {
-          setUser(res.data);
-          console.log(res.data);
-          navigate("/chats");
+          resSetUser(res, navigate);
         })
         .catch((e) => {
           console.log(e, "error");

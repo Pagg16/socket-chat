@@ -4,12 +4,9 @@ import { auth, singUp } from "../../api/api";
 import { useNavigate } from "react-router-dom";
 import { sendUserData } from "./sendUserDate";
 import { validationInput } from "./validationInput";
-import { UserState } from "../../context/userProvider";
 
 function LoginSingUp({ setPopup }) {
   const navigate = useNavigate();
-
-  const { user, setUser } = UserState();
 
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [registrationType, setRegistrationType] = useState(false);
@@ -52,13 +49,17 @@ function LoginSingUp({ setPopup }) {
   useEffect(() => {
     const errors = !registrationType
       ? !!userData.email.error || !!userData.password.error
-      : !!Object.values(userData).find(
-          (input) => !!!(input.value && input.value.trim())
-        );
+      : !!userData.name.error ||
+        !!userData.email.error ||
+        !!userData.password.error ||
+        !!userData.confirmPassword.error;
 
     const textError = !registrationType
       ? !!!userData.email.value || !!!userData.password.value
-      : !!Object.values(userData).find((input) => !!input.error);
+      : !!!userData.name.value ||
+        !!!userData.email.value ||
+        !!!userData.password.value ||
+        !!!userData.confirmPassword.value;
 
     if (errors || textError) {
       return setDisabledButton(true);
@@ -260,8 +261,7 @@ function LoginSingUp({ setPopup }) {
                 setIsLoaderButto,
                 singUp,
                 navigate,
-                auth,
-                setUser
+                auth
               )
             }
           >

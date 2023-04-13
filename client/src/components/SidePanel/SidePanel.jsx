@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./sidePanel.css";
 import SearchIcon from "../../images/search.png";
 import letterIcon from "../../images/envelope.png";
@@ -6,7 +6,7 @@ import UserIcon from "../../images/user.png";
 import downArrowIcon from "../../images/down-arrow.png";
 import Profile from "../Profile/Profile";
 
-function SidePanel({ user: { image, email, name } }) {
+function SidePanel({ user: { email, image, name, token, _id } }) {
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
   const [loadind, setLoading] = useState(false);
@@ -38,7 +38,7 @@ function SidePanel({ user: { image, email, name } }) {
           />
           <div className="sidePanel__user-info-container">
             <img
-              src={"/images/default-picture.png"}
+              src={image}
               alt="user-avatar"
               className="sidePanel__user-avatar"
             />

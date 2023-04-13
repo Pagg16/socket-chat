@@ -3,15 +3,18 @@ const generateToken = require("../config/generateToken");
 const { validationResult } = require("express-validator");
 const User = require("../scheme/userschema");
 const bcrypt = require("bcrypt");
-const { validationResult } = require("express-validator");
+const jwt = require("jsonwebtoken");
 
 const registerUser = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(422).json({ errors: errors.array() });
+    return res.status(401).json({ errors: errors.array() });
   }
 
-  const { name, email, password } = req.body;
+  const name = req.body.name;
+  const email = req.body.email;
+  const password = req.body.password;
+  const picture = req.body.file;
 
   let user = await User.findOne({ email });
   if (user) {
@@ -23,37 +26,77 @@ const registerUser = asyncHandler(async (req, res) => {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
 
-  user = new User({ name, email, password: hashedPassword });
+  user = new User({
+    name,
+    email,
+    password: hashedPassword,
+    picture,
+  });
+
   await user.save();
 
-  res.status(201).json({
-    _id: user._id,
-    name: user.name,
-    email: user.email,
-    token: generateToken(user._id),
+  const filePath = path.join(
+    __dirname,
+    "server",
+    "images",
+    "default-picture.jpg"
+  );
+
+  res.sendFile("../images/default-picture.jpg", {}, (err) => {
+    if (err) {
+      console.log(err);
+      res.status(err.status).end();
+    } else {
+      res.status(201).json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        token: generateToken(user._id),
+      });
+    }
   });
 });
 
 const authUser = asyncHandler(async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(422).json({ errors: errors.array() });
-  }
+  const token = req.headers.authorization.split(" ")[1];
 
-  const { email, password } = req.body;
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await User.findById(decoded.id).select("-password");
 
-  const user = await User.findOne({ email });
-  const passwordCompare = await bcrypt.compare(user.password, password);
-
-  if (user && passwordCompare) {
-    res.status(400).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      token: generateToken(user._id),
-    });
+      res.status(200).json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        image: user.image,
+        token: generateToken(user._id),
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(401).json("Invalid token");
+    }
   } else {
-    res.status(401).json("User not found");
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+
+    if (user && (await bcrypt.compare(password, user.password))) {
+      res.status(200).json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        image: user.image,
+        token: generateToken(user._id),
+      });
+    } else {
+      res.status(401).json("User not found");
+    }
   }
 });
 

@@ -1,3 +1,5 @@
+import { updateTokenAndCreateAxiosInstance } from "../../api/api";
+
 export function sendUserData(
   registrationType,
   userData,
@@ -5,11 +7,16 @@ export function sendUserData(
   setIsLoaderButto,
   singUp,
   navigate,
-  auth
+  auth,
+  setUser
 ) {
-  if (registrationType) {
-    const { name, email, password, confirmPassword, pictureLink } = userData;
+  const name = userData.name.value;
+  const email = userData.email.value;
+  const password = userData.password.value;
+  const confirmPassword = userData.confirmPassword.value;
+  const pictureFile = userData.pictureFile;
 
+  if (registrationType) {
     if (!name || !email || !password || !confirmPassword) {
       setPopup((state) => ({
         ...state,
@@ -29,9 +36,10 @@ export function sendUserData(
     }
 
     setIsLoaderButto(true);
-    singUp(name, email, password, pictureLink)
+    singUp(name, email, password, pictureFile)
       .then((res) => {
-        localStorage.setItem("userInfo", res.data);
+        updateTokenAndCreateAxiosInstance();
+        setUser(res.data);
         localStorage.setItem("jwt", res.data.token);
         console.log(res.data);
         navigate("/chats");
@@ -43,13 +51,12 @@ export function sendUserData(
           text: e.message,
           isVisible: true,
         }));
+        console.log(e);
       })
       .finally(() => {
         setIsLoaderButto(false);
       });
   } else {
-    const { email, password } = userData;
-
     if (!email || !password) {
       setPopup((state) => ({
         ...state,
@@ -62,11 +69,13 @@ export function sendUserData(
     setIsLoaderButto(true);
     auth(email, password)
       .then((res) => {
-        localStorage.setItem("userInfo", res.data);
+        updateTokenAndCreateAxiosInstance();
+        setUser(res.data);
         localStorage.setItem("jwt", res.data.token);
         navigate("/chats");
       })
       .catch((e) => {
+        console.log(e);
         setPopup((state) => ({
           ...state,
           text: e.message,

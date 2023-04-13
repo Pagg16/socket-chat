@@ -1,3 +1,5 @@
+const { body } = require("express-validator");
+
 const registerUserValidations = [
   body("name").notEmpty().withMessage("Name is required"),
   body("email")
@@ -8,8 +10,8 @@ const registerUserValidations = [
   body("password")
     .notEmpty()
     .withMessage("Password is required")
-    .isLength({ min: 8, max: 30 })
-    .withMessage("Password must be between 8 and 30 characters long"),
+    .isLength({ min: 4, max: 30 })
+    .withMessage("Password must be between  and 30 characters long"),
 ];
 
 const authUserValidations = [
@@ -21,8 +23,8 @@ const authUserValidations = [
   body("password")
     .notEmpty()
     .withMessage("Password is required")
-    .isLength({ min: 8, max: 30 })
-    .withMessage("Password must be between 8 and 30 characters long"),
+    .isLength({ min: 4, max: 30 })
+    .withMessage("Password must be between 4 and 30 characters long"),
 ];
 
 module.exports = {

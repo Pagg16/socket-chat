@@ -1,20 +1,15 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import "./loginSingUp.css";
 import { auth, singUp } from "../../api/api";
 import { useNavigate } from "react-router-dom";
 import { sendUserData } from "./sendUserDate";
 import { validationInput } from "./validationInput";
+import { UserState } from "../../context/userProvider";
 
 function LoginSingUp({ setPopup }) {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-
-    if (userInfo) {
-      // navigate("/chats");
-    }
-  }, [navigate]);
+  const { user, setUser } = UserState();
 
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [registrationType, setRegistrationType] = useState(false);
@@ -265,7 +260,8 @@ function LoginSingUp({ setPopup }) {
                 setIsLoaderButto,
                 singUp,
                 navigate,
-                auth
+                auth,
+                setUser
               )
             }
           >

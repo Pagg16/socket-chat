@@ -6,8 +6,8 @@ const userSchema = mongoose.Schema(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     image: {
-      type: String,
-      default: "../images/default-picture.png",
+      data: Buffer,
+      contentType: String,
     },
   },
   {

@@ -10,10 +10,17 @@ const {
   registerUserValidations,
   authUserValidations,
 } = require("../validation/userValidations");
+const multer = require("multer");
+const upload = multer();
 
 const router = express.Router();
 
-router.post("/", validateRequest(registerUserValidations), registerUser);
+router.post(
+  "/",
+  upload.none(),
+  validateRequest(registerUserValidations),
+  registerUser
+);
 router.post("/login", validateRequest(authUserValidations), authUser);
 router.get("/", protect, allUsers);
 

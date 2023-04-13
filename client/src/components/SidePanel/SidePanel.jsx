@@ -6,12 +6,14 @@ import UserIcon from "../../images/user.png";
 import downArrowIcon from "../../images/down-arrow.png";
 import Profile from "../Profile/Profile";
 
-function SidePanel() {
+function SidePanel({ user: { image, email, name } }) {
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
   const [loadind, setLoading] = useState(false);
   const [loadingChat, setLoadingChat] = useState();
   const [isProfileOpen, setIsProfileOpen] = useState("false");
+
+  console.log(image);
 
   return (
     <div className="sidePanel">
@@ -36,7 +38,7 @@ function SidePanel() {
           />
           <div className="sidePanel__user-info-container">
             <img
-              src={UserIcon}
+              src={"/images/default-picture.png"}
               alt="user-avatar"
               className="sidePanel__user-avatar"
             />

@@ -33,9 +33,9 @@ export function validationInput(e, setUserData) {
         [e.target.name]: {
           ...state[e.target.name],
           value: value,
-          error: /^[a-zA-Z0-9]{2,30}$/u.test(value)
+          error: /^[a-zA-Z0-9]{4,30}$/u.test(value)
             ? ""
-            : "Пароль может содержать только буквы латинского алфавита, цифры, дефис и знак подчеркивания и должно быть не менее 2 и не более 30 символов",
+            : "Пароль может содержать только буквы латинского алфавита, цифры, дефис и знак подчеркивания и должно быть не менее 4 и не более 30 символов",
         },
         confirmPassword: {
           ...state.confirmPassword,

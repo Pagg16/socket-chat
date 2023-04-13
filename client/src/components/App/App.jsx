@@ -12,12 +12,12 @@ function App() {
     text: "",
     isVisible: false,
   });
-
+    // localStorage.clear();
   return (
     <div className="app">
       <Routes>
         <Route exact path="/" element={<LoginSingUp setPopup={setPopup} />} />
-        <Route path="/chat" element={<Chats />} />
+        <Route path="/chats" element={<Chats />} />
       </Routes>
       <Popup popup={popup} setPopup={setPopup} />
       {/* <Loader /> */}

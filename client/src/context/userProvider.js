@@ -15,10 +15,9 @@ const UserProvider = ({ children }) => {
     const token = localStorage.getItem("jwt");
 
     if (token) {
-      updateTokenAndCreateAxiosInstance();
       auth()
         .then((res) => {
-          resSetUser(res, navigate);
+          resSetUser(res, navigate, setUser);
         })
         .catch((e) => {
           console.log(e, "error");

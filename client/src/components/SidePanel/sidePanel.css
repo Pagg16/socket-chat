@@ -74,8 +74,20 @@
   background-color: rgba(0, 0, 0, 0.418);
 }
 
-.sidePanel__user-avatar {
+.sidePanel__user-avatar-container {
   width: 40px;
+  height: 40px;
+  border-radius: 10rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.sidePanel__user-avatar {
+  position: absolute;
+  height: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .sidePanel__arrow {

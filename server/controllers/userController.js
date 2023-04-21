@@ -108,4 +108,75 @@ const allUsers = asyncHandler(async (req, res) => {
   res.json(users);
 });
 
-module.exports = { registerUser, authUser, allUsers };
+const updateUserAvatar = asyncHandler(async (req, res) => {
+  const pictureFile = req.file;
+
+  if (!pictureFile) {
+    res.status(400);
+    throw new Error("Please upload a file");
+  }
+
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  user.image = {
+    data: pictureFile.buffer,
+    contentType: pictureFile.mimetype,
+  };
+
+  await user.save();
+
+  res.status(200).json({
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    image: user.image,
+    token: generateToken(user._id),
+  });
+});
+
+const updateUserName = asyncHandler(async (req, res) => {
+  const { name, email } = req.body;
+
+  if (!!!name && !!!email) {
+    res.status(400);
+    throw new Error("Please write name or email");
+  }
+
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  if (!!name) {
+    user.name = name;
+  }
+
+  if (!!email) {
+    user.email = email;
+  }
+
+  await user.save();
+
+  res.status(200).json({
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    image: user.image,
+    token: generateToken(user._id),
+  });
+});
+
+module.exports = {
+  registerUser, 
+  authUser,
+  allUsers,
+  updateUserAvatar,
+  updateUserName,
+};

@@ -1,4 +1,4 @@
-const { body } = require("express-validator");
+const { body, oneOf } = require("express-validator");
 
 const registerUserValidations = [
   body("name").notEmpty().withMessage("Name is required"),

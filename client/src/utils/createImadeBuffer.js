@@ -1,6 +1,4 @@
-export function createImageBuffer(arrayBuffer) {
-  return (
-    "data:image/png;base64," +
-    btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
-  );
+export function createImageBuffer(arrayBuffer, type) {
+  const blob = new Blob([new Uint8Array(arrayBuffer)], { type: "image/png" });
+  return URL.createObjectURL(blob);
 }

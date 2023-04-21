@@ -1,12 +1,17 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./loginSingUp.css";
 import { auth, singUp } from "../../api/api";
 import { useNavigate } from "react-router-dom";
 import { sendUserData } from "./sendUserDate";
 import { validationInput } from "./validationInput";
+import { UserState } from "../../context/userProvider";
+import InputImage from "../InputImage/InputImage";
+import ButtonLoader from "../ButtonLoader/ButtonLoader";
 
 function LoginSingUp({ setPopup }) {
   const navigate = useNavigate();
+
+  const { setUser } = UserState();
 
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [registrationType, setRegistrationType] = useState(false);
@@ -30,6 +35,9 @@ function LoginSingUp({ setPopup }) {
       value: "",
       error: "",
     },
+  });
+
+  const [inputImage, setInputImage] = useState({
     pictureFile: "",
     pictureLinkFile: "",
   });
@@ -37,14 +45,16 @@ function LoginSingUp({ setPopup }) {
   const pictureVisibleContainer = useRef(null);
   const pictureInput = useRef(null);
 
+  const loginContainer = useRef(null);
+
   useEffect(() => {
-    if (!!userData.pictureLinkFile && registrationType) {
-      pictureVisibleContainer.current.style.backgroundImage = `url(${userData.pictureLinkFile})`;
+    if (!!inputImage.pictureLinkFile && registrationType) {
+      pictureVisibleContainer.current.style.backgroundImage = `url(${inputImage.pictureLinkFile})`;
       const dataTransfer = new DataTransfer();
-      dataTransfer.items.add(userData.pictureFile);
+      dataTransfer.items.add(inputImage.pictureFile);
       pictureInput.current.files = dataTransfer.files;
     }
-  }, [userData.pictureLinkFile, registrationType]);
+  }, [inputImage.pictureLinkFile, registrationType]);
 
   useEffect(() => {
     const errors = !registrationType
@@ -68,27 +78,12 @@ function LoginSingUp({ setPopup }) {
     }
   }, [userData, registrationType]);
 
-  function isImage(file) {
-    const type = file.type.split("/", 1)[0];
-    if (type === "image") {
-      return true;
-    }
-
-    setPopup((state) => ({
-      ...state,
-      text: "file must be an image",
-      isVisible: true,
-    }));
-
-    return false;
-  }
-
   return (
     <div className="login">
       <div className="login__title-container">
         <p className="login__title">GaySSenger</p>
       </div>
-      <div className="login__conrainer">
+      <div className="login__conrainer" ref={loginContainer}>
         <div className="login__types-btns">
           <button
             className={`login__types-btn ${
@@ -213,33 +208,12 @@ function LoginSingUp({ setPopup }) {
                 Upload your picture
               </label>
               <div className="login__picture-input">
-                <input
-                  ref={pictureInput}
-                  className="login__input"
-                  id="picture"
-                  name="picture"
-                  placeholder="picture"
-                  type="file"
-                  onChange={(e) => {
-                    if (isImage(e.target.files[0])) {
-                      setUserData((state) => ({
-                        ...state,
-                        pictureFile: e.target.files[0],
-                        pictureLinkFile: URL.createObjectURL(e.target.files[0]),
-                      }));
-                    } else {
-                      const defaultText = new File(
-                        ["Файл не выбран"],
-                        "Файл не выбран"
-                      );
-                      const dataTransfer = new DataTransfer();
-                      dataTransfer.items.add(defaultText);
-                      pictureInput.current.files = dataTransfer.files;
-                    }
-                  }}
+                <InputImage
+                  pictureInput={pictureInput}
+                  setPopup={setPopup}
+                  setInputImage={setInputImage}
                 />
-
-                {!!userData.pictureFile && (
+                {!!inputImage.pictureFile && (
                   <div
                     className="ligin__picture-container"
                     ref={pictureVisibleContainer}
@@ -261,12 +235,13 @@ function LoginSingUp({ setPopup }) {
                 setIsLoaderButto,
                 singUp,
                 navigate,
-                auth
+                auth,
+                setUser
               )
             }
           >
             {isLoaderButton ? (
-              <span className="login__loader"></span>
+              <ButtonLoader addClass={"login__loader"} />
             ) : (
               `${registrationType ? "Sing Up" : "Login"}`
             )}

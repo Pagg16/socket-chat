@@ -2,18 +2,19 @@ import React, { useEffect, useState } from "react";
 import "./sidePanel.css";
 import SearchIcon from "../../images/search.png";
 import letterIcon from "../../images/envelope.png";
-import UserIcon from "../../images/user.png";
 import downArrowIcon from "../../images/down-arrow.png";
 import Profile from "../Profile/Profile";
 
-function SidePanel({ user: { email, image, name, token, _id } }) {
+function SidePanel({
+  user: { email, image, name, token, _id },
+  user,
+  setPopup,
+}) {
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
   const [loadind, setLoading] = useState(false);
   const [loadingChat, setLoadingChat] = useState();
-  const [isProfileOpen, setIsProfileOpen] = useState("false");
-
-  console.log(image);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   return (
     <div className="sidePanel">
@@ -37,11 +38,13 @@ function SidePanel({ user: { email, image, name, token, _id } }) {
             src={letterIcon}
           />
           <div className="sidePanel__user-info-container">
-            <img
-              src={image}
-              alt="user-avatar"
-              className="sidePanel__user-avatar"
-            />
+            <div className="sidePanel__user-avatar-container">
+              <img
+                src={image}
+                alt="user-avatar"
+                className="sidePanel__user-avatar"
+              />
+            </div>
             <img
               src={downArrowIcon}
               alt="user-avatar"
@@ -50,7 +53,12 @@ function SidePanel({ user: { email, image, name, token, _id } }) {
 
             <div className="sidePanel__user-info-list-container">
               <ul className="sidePanel__user-info-list">
-                <li className="sidePanel__user-info-list-item">Profile</li>
+                <li
+                  className="sidePanel__user-info-list-item"
+                  onClick={() => setIsProfileOpen(true)}
+                >
+                  Profile
+                </li>
                 <li className="sidePanel__user-info-list-item">Logout</li>
               </ul>
             </div>
@@ -58,7 +66,13 @@ function SidePanel({ user: { email, image, name, token, _id } }) {
         </div>
       </div>
 
-      <Profile image={UserIcon} />
+      {isProfileOpen && (
+        <Profile
+          user={user}
+          setIsProfileOpen={setIsProfileOpen}
+          setPopup={setPopup}
+        />
+      )}
     </div>
   );
 }

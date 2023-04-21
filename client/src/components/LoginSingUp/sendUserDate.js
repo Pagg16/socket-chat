@@ -1,5 +1,3 @@
-import { useNavigate } from "react-router-dom";
-import { updateTokenAndCreateAxiosInstance } from "../../api/api";
 import { resSetUser } from "../../utils/resSetUser";
 
 export function sendUserData(
@@ -9,7 +7,8 @@ export function sendUserData(
   setIsLoaderButto,
   singUp,
   navigate,
-  auth
+  auth,
+  setUser
 ) {
   const name = userData.name.value;
   const email = userData.email.value;
@@ -39,7 +38,7 @@ export function sendUserData(
     setIsLoaderButto(true);
     singUp(name, email, password, pictureFile)
       .then((res) => {
-        resSetUser(res, navigate);
+        resSetUser(res, navigate, setUser);
       })
 
       .catch((e) => {
@@ -66,7 +65,7 @@ export function sendUserData(
     setIsLoaderButto(true);
     auth(email, password)
       .then((res) => {
-        resSetUser(res, navigate);
+        resSetUser(res, navigate, setUser);
       })
       .catch((e) => {
         console.log(e);

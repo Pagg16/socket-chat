@@ -38,6 +38,23 @@ export function auth(email, password) {
   });
 }
 
+export function updateUserAvatar(pictureFile) {
+  const formData = new FormData();
+  formData.append("pictureFile", pictureFile);
+  return axiosApi.put(baseUrl + "/user/image", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+}
+
+export function unpateUserDate(name, email) {
+  return axiosApi.put(baseUrl + "/user/update", {
+    name,
+    email,
+  });
+}
+
 export function updateTokenAndCreateAxiosInstance() {
   const token = localStorage.getItem("jwt");
   if (token) {

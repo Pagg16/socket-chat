@@ -1,16 +1,18 @@
 import { updateTokenAndCreateAxiosInstance } from "../api/api";
-import { UserState } from "../context/userProvider";
 import { createImageBuffer } from "./createImadeBuffer";
+import defaultUser from "../images/user.png";
 
-export function resSetUser(res, navigate) {
-  const { setUser } = UserState();
+export function resSetUser(res, navigate, setUser) {
   localStorage.setItem("jwt", res.data.token);
   updateTokenAndCreateAxiosInstance();
-  setUser(
-    (() => ({
-      ...res.data,
-      image: createImageBuffer(res.data.image.data.data),
-    }))()
-  );
+
+  const image = !!res.data.image
+    ? createImageBuffer(res.data.image.data.data, res.data.image.contentType)
+    : defaultUser;
+
+  setUser({
+    ...res.data,
+    image: image,
+  });
   navigate("/chats");
 }

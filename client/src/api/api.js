@@ -38,6 +38,12 @@ export function auth(email, password) {
   });
 }
 
+export function allUsers(query) {
+  return axiosApi.get(baseUrl + "/user/", {
+    params: { query },
+  });
+}
+
 export function updateUserAvatar(pictureFile) {
   const formData = new FormData();
   formData.append("pictureFile", pictureFile);
@@ -52,6 +58,23 @@ export function unpateUserDate(name, email) {
   return axiosApi.put(baseUrl + "/user/update", {
     name,
     email,
+  });
+}
+
+export function accessChat(userId) {
+  return axiosApi.post(baseUrl + "/chat/", {
+    userId,
+  });
+}
+
+export function fetchChats() {
+  return axiosApi.get(baseUrl + "/chat/");
+}
+
+export function createGroupChat(users, name) {
+  return axiosApi.post(baseUrl + "/chat/group", {
+    users: JSON.stringify(users),
+    name: JSON.stringify(name),
   });
 }
 

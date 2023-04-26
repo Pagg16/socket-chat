@@ -6,7 +6,7 @@ export function resSetUser(res, navigate, setUser) {
   localStorage.setItem("jwt", res.data.token);
   updateTokenAndCreateAxiosInstance();
 
-  const image = !!res.data.image
+  const image = !!res.data.image.data
     ? createImageBuffer(res.data.image.data.data, res.data.image.contentType)
     : defaultUser;
 

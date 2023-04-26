@@ -4,22 +4,30 @@ import SearchIcon from "../../images/search.png";
 import letterIcon from "../../images/envelope.png";
 import downArrowIcon from "../../images/down-arrow.png";
 import Profile from "../Profile/Profile";
+import SearchUsers from "../SearchUsers/SearchUsers";
+import { useNavigate } from "react-router-dom";
 
 function SidePanel({
   user: { email, image, name, token, _id },
   user,
   setPopup,
 }) {
-  const [search, setSearch] = useState("");
-  const [searchResult, setSearchResult] = useState([]);
-  const [loadind, setLoading] = useState(false);
-  const [loadingChat, setLoadingChat] = useState();
+  const navigation = useNavigate();
+
+  const [isOpenSerch, setIsOpenSearch] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   return (
     <div className="sidePanel">
+      <SearchUsers
+        isOpenSerch={isOpenSerch}
+        setIsOpenSearch={setIsOpenSearch}
+      />
       <div className="sidePanel__container">
-        <div className="sidePanel__search-container">
+        <div
+          className="sidePanel__search-container"
+          onClick={() => setIsOpenSearch(true)}
+        >
           <img
             className="sidePanel__search-img"
             alt="search-icon"
@@ -29,7 +37,7 @@ function SidePanel({
           <p className="sidePanel__search-clue">Search User to chat</p>
         </div>
 
-        <div className="sidePanel__title">GAYSENNGER</div>
+        <div className="sidePanel__title">GAYSSENNGER</div>
 
         <div className="sidePanel__info-container">
           <img
@@ -59,7 +67,15 @@ function SidePanel({
                 >
                   Profile
                 </li>
-                <li className="sidePanel__user-info-list-item">Logout</li>
+                <li
+                  className="sidePanel__user-info-list-item"
+                  onClick={() => {
+                    localStorage.clear();
+                    navigation("/");
+                  }}
+                >
+                  Logout
+                </li>
               </ul>
             </div>
           </div>

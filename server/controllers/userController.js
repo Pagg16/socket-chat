@@ -174,7 +174,7 @@ const updateUserName = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
-  registerUser, 
+  registerUser,
   authUser,
   allUsers,
   updateUserAvatar,

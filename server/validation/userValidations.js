@@ -27,7 +27,10 @@ const authUserValidations = [
     .withMessage("Password must be between 4 and 30 characters long"),
 ];
 
+const allUserValidations = [body("query").notEmpty()];
+
 module.exports = {
   registerUserValidations,
   authUserValidations,
+  allUserValidations,
 };

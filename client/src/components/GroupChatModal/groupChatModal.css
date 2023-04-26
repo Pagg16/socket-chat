@@ -1,0 +1,229 @@
+.groupChatModal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.301);
+  opacity: 0;
+  z-index: -1;
+}
+
+.groupChatModal_visible {
+  opacity: 1;
+  z-index: 1;
+}
+
+.groupChatModal__container {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
+                                supported by Chrome, Edge, Opera and Firefox */
+
+  position: fixed;
+  left: 50%;
+  top: 20vh;
+  transform: translateX(-50%);
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 40%;
+  max-width: 400px;
+  box-sizing: border-box;
+  padding: 10px 10px 35px;
+  border-radius: 1rem;
+
+  max-height: calc(100vh - 20vh);
+}
+
+.groupChatModal__container_bottom {
+  padding-bottom: 5px;
+}
+
+.groupChatModal__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.groupChatModal__crate-chat {
+  background-color: rgb(13, 135, 250);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  font-size: 15px;
+  margin-left: auto;
+}
+
+.groupChatModal__crate-chat_disabled {
+  background-color: rgb(150, 150, 150);
+}
+
+.groupChatModal__selected-users {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+  width: 100%;
+  max-width: 100%;
+  overflow-y: hidden;
+  background-color: rgb(231, 231, 231);
+  border-radius: 0.5rem;
+  box-sizing: border-box;
+  padding: 5px;
+}
+
+.groupChatModal__selected-user {
+  margin-right: 8px;
+  border-radius: 1rem;
+  box-sizing: border-box;
+  padding: 2px 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.groupChatModal__selected-user-remove {
+  border-radius: 1rem;
+  border: none;
+  padding: 1px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.groupChatModal__bts-close {
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  padding: 3px 6px;
+  margin: 0;
+  border-radius: 1rem;
+}
+
+.groupChatModal__input {
+  width: 100%;
+  margin-top: 20px;
+  font-size: 15px;
+  padding: 5px 2px;
+  outline: none;
+  border: none;
+  border-bottom: 2px solid rgb(0, 0, 0);
+}
+
+.groupChatModal__input:focus {
+  border-bottom: 2px solid blue;
+}
+
+.groupChatModal__input_error {
+  border-color: red;
+}
+
+.groupChatModal__input_error:focus {
+  border-color: red;
+}
+
+.groupChatModal__users {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.groupChatModal__user {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  margin-top: 5px;
+  border-radius: 0.5rem;
+  box-sizing: border-box;
+  padding: 5px;
+  width: 90%;
+  cursor: pointer;
+  background-color: rgb(238, 238, 238);
+}
+
+.groupChatModal__selected-user-remove {
+  margin-left: 5px;
+}
+
+.groupChatModal__user-image-container {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  border-radius: 10rem;
+  border: 1px dotted gray;
+  overflow: hidden;
+  margin-right: 20px;
+}
+
+.groupChatModal__user-image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 100%;
+}
+
+.groupChatModal__user-data-container {
+  font-size: 20px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  height: 100%;
+  display: flex;
+  align-items: start;
+  justify-content: space-evenly;
+  flex-direction: column;
+}
+
+.groupChatModal__user-data {
+  white-space: nowrap; /* Запрещаем перенос строк */
+  overflow: hidden; /* Обрезаем все, что не помещается в область */
+  text-overflow: ellipsis; /* Добавляем многоточие */
+}
+
+.groupChatModal__user-data-type {
+  font-weight: bold;
+}
+/* Привет этот код генерирует пользователя с рандомным цветом заднего фона, но как только я добавляю или убираю пользователя то все цвета меняются, как сохранить постоянный цвет для одного пользовтеля         {selectedUsers.length > 0 && (
+  <div className="groupChatModal__selected-users">
+    {selectedUsers.map((user) => {
+      const color = randomColor();
+      return (
+        <div
+          key={user._id}
+          className="groupChatModal__selected-user"
+          style={{ backgroundColor: `${color}` }}
+        >
+          {user.name}
+          <button
+            className="groupChatModal__selected-user-remove"
+            onClick={() => {
+              setSelectedUsers((state) => {
+                return state.filter(
+                  (userDate) => userDate._id !== user._id
+                );
+              });
+            }}
+          >
+            x
+          </button>
+        </div>
+      );
+    })}
+  </div>
+)} */

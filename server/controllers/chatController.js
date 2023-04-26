@@ -10,14 +10,13 @@ const accessChat = asyncHandler(async (req, res) => {
     return res.sendStatus(400);
   }
 
-  var isChat = await chatRoutes
-    .find({
-      isGroupChat: false,
-      $and: [
-        { users: { $elemMatch: { $eq: req.user._id } } },
-        { users: { $elemMatch: { $eq: userId } } },
-      ],
-    })
+  let isChat = await Chat.find({
+    isGroupChat: false,
+    $and: [
+      { users: { $elemMatch: { $eq: req.user._id } } },
+      { users: { $elemMatch: { $eq: userId } } },
+    ],
+  })
     .populate("users", "-password")
     .populate("lastedMessage");
 
@@ -26,18 +25,16 @@ const accessChat = asyncHandler(async (req, res) => {
     select: "name image email",
   });
 
-  if (isChat.length > 0) {
-    res.send(isChat[0]);
-  } else {
-    var chatData = {
-      chatName: "sender",
-      isGroupChat: false,
-      users: [req.user._id, userId],
-    };
+  if (isChat) {
+    return res.send(isChat);
   }
 
   try {
-    const createdChat = await Chat.create(chatData);
+    const createdChat = await Chat.create({
+      chatName: "sender",
+      isGroupChat: false,
+      users: [req.user._id, userId],
+    });
 
     const fullChat = await Chat.findOne({ _id: createdChat.id }).populate(
       "users",
@@ -76,19 +73,19 @@ const fetchChats = asyncHandler(async (req, res) => {
 });
 
 const createGroupChat = asyncHandler(async (req, res) => {
+  console.log(1);
+
   if (!req.body.users || !req.body.name) {
     return res.status(400).send({ message: "Please Fill all the feilds" });
   }
 
-  var users = JSON.parse(req.body.users);
+  const users = JSON.parse(req.body.users);
 
   if (users.length < 2) {
     return res
       .status(400)
       .send("More than 2 users are required to from a group chat");
   }
-
-  users.push(req.user);
 
   try {
     const chatGroup = await Chat.create({
@@ -97,6 +94,8 @@ const createGroupChat = asyncHandler(async (req, res) => {
       isGroupChat: true,
       groupAdmin: req.user,
     });
+
+    await chatGroup.save();
 
     const fullGroupChat = await Chat.findOne({
       _id: isGroupChat._id,

@@ -12,10 +12,10 @@ const {
   registerUserValidations,
   authUserValidations,
   updateUserValidation,
+  allUserValidations,
 } = require("../validation/userValidations");
 const multer = require("multer");
 const upload = multer();
-
 const router = express.Router();
 
 router.post(
@@ -25,8 +25,13 @@ router.post(
   registerUser
 );
 router.post("/login", validateRequest(authUserValidations), authUser);
-router.get("/", protect, allUsers);
+router.get("/", validateRequest(allUserValidations), protect, allUsers);
 router.put("/image", protect, upload.single("pictureFile"), updateUserAvatar);
-router.put("/update", protect, authUserValidations, updateUserName);
+router.put(
+  "/update",
+  protect,
+  validateRequest(authUserValidations),
+  updateUserName
+);
 
 module.exports = router;

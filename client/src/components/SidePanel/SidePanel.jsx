@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "./sidePanel.css";
 import SearchIcon from "../../images/search.png";
 import letterIcon from "../../images/envelope.png";
@@ -6,16 +6,20 @@ import downArrowIcon from "../../images/down-arrow.png";
 import Profile from "../Profile/Profile";
 import SearchUsers from "../SearchUsers/SearchUsers";
 import { useNavigate } from "react-router-dom";
+import defaultUser from "../../images/user.png";
+import { createImageBuffer } from "../../utils/createImadeBuffer";
 
-function SidePanel({
-  user: { email, image, name, token, _id },
-  user,
-  setPopup,
-}) {
+function SidePanel({ user, setPopup }) {
   const navigation = useNavigate();
 
   const [isOpenSerch, setIsOpenSearch] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  const userAvatar = useMemo(() => {
+    return !!user.image?.data
+      ? createImageBuffer(user.image.data.data, user.image.contentType)
+      : defaultUser;
+  }, [user]);
 
   return (
     <div className="sidePanel">
@@ -37,7 +41,7 @@ function SidePanel({
           <p className="sidePanel__search-clue">Search User to chat</p>
         </div>
 
-        <div className="sidePanel__title">GAYSSENNGER</div>
+        <div className="sidePanel__title">GAYSSENGER</div>
 
         <div className="sidePanel__info-container">
           <img
@@ -48,7 +52,7 @@ function SidePanel({
           <div className="sidePanel__user-info-container">
             <div className="sidePanel__user-avatar-container">
               <img
-                src={image}
+                src={userAvatar}
                 alt="user-avatar"
                 className="sidePanel__user-avatar"
               />

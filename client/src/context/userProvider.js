@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { createContext, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth, updateTokenAndCreateAxiosInstance } from "../api/api";
+import { auth } from "../api/api";
 import { resSetUser } from "../utils/resSetUser";
 
 export const UserContext = createContext();

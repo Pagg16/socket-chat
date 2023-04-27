@@ -1,6 +1,6 @@
 .myChats {
+  width: 20%;
   height: 100%;
-  max-width: 40%;
   background-color: white;
   border-radius: 0.5rem;
   display: flex;
@@ -8,26 +8,29 @@
   flex-direction: column;
   box-sizing: border-box;
   padding: 5px;
-  overflow-y: auto;
+  position: relative;
 }
 
 .myChats__header {
   width: 100%;
   display: flex;
   align-items: center;
-  padding-top: 20px;
+  padding-top: 10px;
   justify-content: space-evenly;
+  font-size: 20px;
+  white-space: nowrap;
 }
 
 .myChats__new-group-chat {
   display: flex;
   align-items: center;
   padding: 0 5px 0;
-  margin: 0;
+  margin: 0 0 0 10px;
   border-radius: 1rem;
   border: none;
   background-color: rgb(212, 212, 212);
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .myChats__new-group-chat-plus {
@@ -35,9 +38,76 @@
   margin-left: 5px;
 }
 
+.myChats__chats-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 94%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding-bottom: 7px;
+}
+
+.myChats__chats {
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 0 5px 0 5px;
+}
+
 .myChats__chat {
   margin-top: 10px;
-  background-color: rgb(21, 201, 201);
+  background-color: rgb(219, 219, 219);
   width: 100%;
   border-radius: 0.5rem;
+  box-sizing: border-box;
+  padding: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  cursor: pointer;
+}
+
+.myChats__chat_selected {
+  background-color: rgb(21, 201, 201);
+}
+
+.myChats__chat-info {
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.myChats__chat-name {
+  max-width: 75%;
+  font-size: 18px;
+  margin-left: 7px;
+  margin-bottom: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.myChats__image-container {
+  min-width: 40px;
+  min-height: 40px;
+  position: relative;
+  border-radius: 10rem;
+  overflow: hidden;
+}
+
+.myChats__chat-avatar {
+  height: 100%;
+  top: 0;
+  position: absolute;
+  right: 50%;
+  transform: translateX(50%);
+}
+
+.myChats__image-container_group {
+  border-radius: 0;
 }

@@ -7,12 +7,10 @@ import { resSetUser } from "../../utils/resSetUser";
 import { useNavigate } from "react-router-dom";
 import { UserState } from "../../context/userProvider";
 import ButtonLoader from "../ButtonLoader/ButtonLoader";
+import defaultUser from "../../images/user.png";
+import { createImageBuffer } from "../../utils/createImadeBuffer";
 
-function Profile({
-  user: { email, image, name, token, _id },
-  setIsProfileOpen,
-  setPopup,
-}) {
+function Profile({ user, user: { email, name }, setIsProfileOpen, setPopup }) {
   const navigate = useNavigate();
   const { setUser } = UserState();
 
@@ -28,6 +26,12 @@ function Profile({
     pictureFile: "",
     pictureLinkFile: "",
   });
+
+  const userAvatar = useMemo(() => {
+    return !!user.image?.data
+      ? createImageBuffer(user.image.data.data, user.image.contentType)
+      : defaultUser;
+  }, [user]);
 
   useEffect(() => {
     if (!!inputImage.pictureFile) {
@@ -131,7 +135,7 @@ function Profile({
             <ButtonLoader addClass={"profile__loader-avatar"} />
           ) : (
             <img
-              src={image}
+              src={userAvatar}
               alt="user-avatar"
               className="profile__user-avatar"
             />

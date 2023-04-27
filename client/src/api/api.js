@@ -73,8 +73,29 @@ export function fetchChats() {
 
 export function createGroupChat(users, name) {
   return axiosApi.post(baseUrl + "/chat/group", {
-    users: JSON.stringify(users),
-    name: JSON.stringify(name),
+    users: JSON.stringify(users.map((user) => user._id)),
+    name,
+  });
+}
+
+export function renameGroup(chatId, chatName) {
+  return axiosApi.put(baseUrl + "/chat/rename", {
+    chatId,
+    chatName,
+  });
+}
+
+export function groupRemove(chatId, userId) {
+  return axiosApi.put(baseUrl + "/chat/groupremove", {
+    chatId,
+    userId,
+  });
+}
+
+export function groupAdd(chatId, userId) {
+  return axiosApi.put(baseUrl + "/chat/groupadd", {
+    chatId,
+    userId,
   });
 }
 

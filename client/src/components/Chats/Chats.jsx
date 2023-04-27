@@ -13,7 +13,10 @@ function Chats({ setPopup }) {
   const { user } = UserState();
   const { chats, setChats } = ChatState();
 
-  const [isGroupChatModal, setIsGroupChatModal] = useState(false);
+  const [isGroupChatModal, setIsGroupChatModal] = useState({
+    isOpen: false,
+    isUpdate: false,
+  });
 
   useEffect(() => {
     if (!!user) {
@@ -35,15 +38,20 @@ function Chats({ setPopup }) {
           <MyChats
             chats={chats}
             user={user}
-            setIsGroupChatModal={setIsGroupChatModal}
+            setIsGroupChatModal={(param) =>
+              setIsGroupChatModal((state) => ({ ...state, isOpen: param }))
+            }
           />
         )}
-        {!!user && <ChatBox />}
+        {!!user && (
+          <ChatBox user={user} setIsGroupChatModal={setIsGroupChatModal} />
+        )}
       </div>
-      {!!user && (
+      {!!user && isGroupChatModal.isOpen && (
         <GroupChatModal
           isGroupChatModal={isGroupChatModal}
           setIsGroupChatModal={setIsGroupChatModal}
+          user={user}
         />
       )}
     </div>

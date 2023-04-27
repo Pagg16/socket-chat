@@ -20,6 +20,7 @@ function SearchUsers({ isOpenSerch, setIsOpenSearch }) {
           setChats((state) => [res.data, ...state]);
         }
       })
+      .finally(() => setIsOpenSearch(false))
       .catch((e) => console.log(e));
   }
 
@@ -50,7 +51,7 @@ function SearchUsers({ isOpenSerch, setIsOpenSearch }) {
 
         {searchUses.map((user) => {
           let image;
-          if (!!user.image) {
+          if (!!user.image?.data) {
             image = createImageBuffer(user.image.data.data);
           } else {
             image = baseImageUser;

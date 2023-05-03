@@ -99,6 +99,17 @@ export function groupAdd(chatId, userId) {
   });
 }
 
+export function allMassage(chatId) {
+  return axiosApi.post(`${baseUrl}/message/${chatId}`);
+}
+
+export function sendMassage(content, chatId) {
+  return axiosApi.post(baseUrl + "/message", {
+    content,
+    chatId,
+  });
+}
+
 export function updateTokenAndCreateAxiosInstance() {
   const token = localStorage.getItem("jwt");
   if (token) {

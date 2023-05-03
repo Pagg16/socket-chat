@@ -6,16 +6,6 @@ import { chatData } from "../../utils/chatData";
 function MyChats({ chats, user, setIsGroupChatModal }) {
   const { selectedChat, setSelectedChat } = ChatState();
 
-  // chats = (() => {
-  //   const newChats = [];
-
-  //   for (let i = 0; i < 10; i++) {
-  //     newChats.push(...chats);
-  //   }
-
-  //   return newChats;
-  // })();
-
   return (
     <div className="myChats">
       <div className="myChats__header">

@@ -6,19 +6,23 @@ import { createImageBuffer } from "../../utils/createImadeBuffer";
 import baseImageUser from "../../images/user.png";
 import { ChatState } from "../../context/chatProvider";
 import SearchUsersInput from "../SearchUserInput/SearchUserInput";
+import { UserState } from "../../context/userProvider";
+import { SocketState } from "../../context/socketProvider";
 
 function SearchUsers({ isOpenSerch, setIsOpenSearch }) {
   const [inputSearch, setInputSearch] = useState("");
   const [searchUses, setSearchUsers] = useState([]);
-
+  const { setSelectedChat } = ChatState();
   const { chats, setChats } = ChatState();
+  const { user } = UserState();
+  const { socket } = SocketState();
 
   function createChat(userId) {
     accessChat(userId)
       .then((res) => {
-        if (!chats.find((chat) => chat._id === res.data._id)) {
-          setChats((state) => [res.data, ...state]);
-        }
+        setChats((state) => [res.data, ...state]);
+        socket.emit("addUserChat", { userId, chatId: res.data._id });
+        setSelectedChat(res.data);
       })
       .finally(() => setIsOpenSearch(false))
       .catch((e) => console.log(e));
@@ -49,10 +53,10 @@ function SearchUsers({ isOpenSerch, setIsOpenSearch }) {
           setInputSearch={setInputSearch}
         />
 
-        {searchUses.map((user) => {
+        {searchUses.map((userData) => {
           let image;
-          if (!!user.image?.data) {
-            image = createImageBuffer(user.image.data.data);
+          if (!!userData.image?.data) {
+            image = createImageBuffer(userData.image.data.data);
           } else {
             image = baseImageUser;
           }
@@ -60,9 +64,31 @@ function SearchUsers({ isOpenSerch, setIsOpenSearch }) {
           return (
             <div
               className="searchUser__user"
-              key={user._id}
+              key={userData._id}
               onClick={() => {
-                createChat(user._id);
+                const existingChat = chats.find((chat) => {
+                  if (chat.users.length === 2) {
+                    const [{ _id: user1Id }, { _id: user2Id }] = chat.users;
+                    const userIds = [user1Id, user2Id];
+
+                    return (
+                      userIds.includes(userData._id) &&
+                      userIds.includes(user._id)
+                    );
+                  }
+                  return false;
+                });
+
+                if (existingChat) {
+                  setChats((state) => [
+                    existingChat,
+                    ...state.filter((chat) => chat._id !== existingChat._id),
+                  ]);
+                  setSelectedChat(existingChat);
+                  return setIsOpenSearch(false);
+                }
+
+                createChat(userData._id);
               }}
             >
               <div className="searchUser__user-image-container">
@@ -75,11 +101,11 @@ function SearchUsers({ isOpenSerch, setIsOpenSearch }) {
               <div className="searchUser__user-data">
                 <div className="searchUser__user-data">
                   <span className="searchUser__user-data-type">Name: </span>
-                  {user.name}
+                  {userData.name}
                 </div>
                 <div className="searchUser__user-data">
                   <span className="searchUser__user-data-type">Email: </span>{" "}
-                  {user.email}
+                  {userData.email}
                 </div>
               </div>
             </div>

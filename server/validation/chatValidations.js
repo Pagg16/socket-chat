@@ -13,7 +13,10 @@ const chatRemoveUserValidations = [
   body("userId").notEmpty().withMessage("UserId is required"),
 ];
 
+const findChatValidations = [body("query").notEmpty()];
+
 module.exports = {
   chatUpdateNameValidations,
   chatRemoveUserValidations,
+  findChatValidations,
 };

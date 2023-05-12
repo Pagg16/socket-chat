@@ -61,6 +61,12 @@ export function unpateUserDate(name, email) {
   });
 }
 
+export function findUserById(userId) {
+  return axiosApi.get(baseUrl + "/user/findUser", {
+    params: { userId },
+  });
+}
+
 export function accessChat(userId) {
   return axiosApi.post(baseUrl + "/chat/", {
     userId,
@@ -96,6 +102,12 @@ export function groupAdd(chatId, userId) {
   return axiosApi.put(baseUrl + "/chat/groupadd", {
     chatId,
     userId,
+  });
+}
+
+export function findChat(chatId) {
+  return axiosApi.get(baseUrl + "/chat/findGroup", {
+    params: { chatId },
   });
 }
 

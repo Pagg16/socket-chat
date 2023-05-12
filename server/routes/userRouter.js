@@ -5,13 +5,13 @@ const {
   allUsers,
   updateUserAvatar,
   updateUserName,
+  findUser,
 } = require("../controllers/userController");
 const protect = require("../middlewares/authMiddleware");
 const { validateRequest } = require("../validation/validateRequest");
 const {
   registerUserValidations,
   authUserValidations,
-  updateUserValidation,
   allUserValidations,
 } = require("../validation/userValidations");
 const multer = require("multer");
@@ -26,6 +26,7 @@ router.post(
 );
 router.post("/login", validateRequest(authUserValidations), authUser);
 router.get("/", validateRequest(allUserValidations), protect, allUsers);
+router.get("/findUser", validateRequest(allUserValidations), protect, findUser);
 router.put("/image", protect, upload.single("pictureFile"), updateUserAvatar);
 router.put(
   "/update",

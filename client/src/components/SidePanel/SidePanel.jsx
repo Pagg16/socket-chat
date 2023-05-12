@@ -8,18 +8,29 @@ import SearchUsers from "../SearchUsers/SearchUsers";
 import { useNavigate } from "react-router-dom";
 import defaultUser from "../../images/user.png";
 import { createImageBuffer } from "../../utils/createImadeBuffer";
+import { ChatState } from "../../context/chatProvider";
 
 function SidePanel({ user, setPopup }) {
   const navigation = useNavigate();
 
   const [isOpenSerch, setIsOpenSearch] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const { unreadMessages } = ChatState();
 
-  const userAvatar = useMemo(() => {
-    return !!user.image?.data
-      ? createImageBuffer(user.image.data.data, user.image.contentType)
-      : defaultUser;
-  }, [user]);
+  const userAvatar = useMemo(
+    () =>
+      !!user.image?.data
+        ? createImageBuffer(user.image.data.data, user.image.contentType)
+        : defaultUser,
+    [user]
+  );
+
+  const userUnreadMessages = useMemo(() => {
+    if (!!!unreadMessages) return;
+    return Object.values(unreadMessages).reduce((accumulator, currentValue) => {
+      return accumulator + currentValue;
+    }, 0);
+  }, [unreadMessages]);
 
   return (
     <div className="sidePanel">
@@ -49,6 +60,9 @@ function SidePanel({ user, setPopup }) {
             alt="letter-icon"
             src={letterIcon}
           />
+          {userUnreadMessages > 0 && (
+            <div className="sidePanel__unread">{userUnreadMessages}</div>
+          )}
           <div className="sidePanel__user-info-container">
             <div className="sidePanel__user-avatar-container">
               <img

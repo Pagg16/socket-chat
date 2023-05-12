@@ -18,11 +18,11 @@ const sendMassage = asyncHandler(async (req, res) => {
       chat: chatId,
     });
 
-    message = await message.populate("sender", "name image");
+    message = await message.populate("sender", "name _id");
     message = await message.populate("chat");
     message = await User.populate(message, {
       path: "chat.users",
-      select: "name image email",
+      select: "_id",
     });
 
     await Chat.findByIdAndUpdate(chatId, {
@@ -37,16 +37,22 @@ const sendMassage = asyncHandler(async (req, res) => {
 });
 
 const allMassage = asyncHandler(async (req, res) => {
+  const { chatId } = req.params;
+
   try {
-    const messages = await Message.find({ chat: req.params.chatId })
-      .populate("sender", "name image email")
+    const messages = await Message.find({ chat: chatId })
+      .populate("sender", "name _id")
       .populate("chat");
 
     res.json(messages);
+
+    await User.findOneAndUpdate(
+      { _id: req.user._id },
+      { $unset: { [`unreadMessages.${chatId}`]: 1 } }
+    );
   } catch (e) {
     res.status(400);
     throw new Error(e.message);
   }
 });
-
 module.exports = { sendMassage, allMassage };

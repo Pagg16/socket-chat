@@ -9,7 +9,7 @@ export const UserContext = createContext();
 const UserProvider = ({ children }) => {
   const navigate = useNavigate();
 
-  const [user, setUser] = useState({});
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem("jwt");

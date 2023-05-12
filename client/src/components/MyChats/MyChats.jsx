@@ -4,10 +4,10 @@ import { ChatState } from "../../context/chatProvider";
 import { chatData } from "../../utils/chatData";
 
 function MyChats({ chats, user, setIsGroupChatModal }) {
-  const { selectedChat, setSelectedChat } = ChatState();
+  const { selectedChat, setSelectedChat, unreadMessages } = ChatState();
 
   return (
-    <div className="myChats">
+    <div className="myChats" onClick={() => setSelectedChat(null)}>
       <div className="myChats__header">
         My Chats
         <button
@@ -27,13 +27,19 @@ function MyChats({ chats, user, setIsGroupChatModal }) {
               return (
                 <div
                   key={chat._id}
-                  onClick={() => {
+                  onClick={(e) => {
                     setSelectedChat(chat);
+                    e.stopPropagation();
                   }}
                   className={`myChats__chat ${
-                    selectedChat._id === chat._id && "myChats__chat_selected"
+                    selectedChat?._id === chat._id && "myChats__chat_selected"
                   }`}
                 >
+                  {!!unreadMessages[chat._id] && (
+                    <div className="myChats__chat-unread">
+                      {unreadMessages[chat._id]}
+                    </div>
+                  )}
                   <div className="myChats__chat-info">
                     <div
                       className={`myChats__image-container ${
@@ -46,8 +52,18 @@ function MyChats({ chats, user, setIsGroupChatModal }) {
                         className="myChats__chat-avatar"
                       />
                     </div>
-                    <div className="myChats__chat-name">
-                      {chat.isGroupChat ? chat.chatName : opponent.name}
+                    <div className="myChats__chat-info-message">
+                      <div className="myChats__chat-name">
+                        {chat.isGroupChat ? chat.chatName : opponent.name}
+                      </div>
+                      {chat.lastedMessage && selectedChat?._id !== chat._id && (
+                        <div className="myChats__chat-lastedMessage">
+                          <span className="myChats__chat-lastedMessage-name">
+                            {chat.lastedMessage?.sender.name}:
+                          </span>{" "}
+                          {chat.lastedMessage?.content}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

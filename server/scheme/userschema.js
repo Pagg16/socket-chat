@@ -9,6 +9,10 @@ const userSchema = mongoose.Schema(
       data: Buffer,
       contentType: String,
     },
+    unreadMessages: {
+      type: Object,
+      default: {},
+    },
   },
   {
     timestamps: true,

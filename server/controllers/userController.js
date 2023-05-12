@@ -65,6 +65,7 @@ const authUser = asyncHandler(async (req, res) => {
         name: user.name,
         email: user.email,
         image: user.image,
+        unreadMessages: user.unreadMessages,
         token: generateToken(user._id),
       });
     } catch (error) {
@@ -87,6 +88,7 @@ const authUser = asyncHandler(async (req, res) => {
         name: user.name,
         email: user.email,
         image: user.image,
+        unreadMessages: user.unreadMessages,
         token: generateToken(user._id),
       });
     } else {
@@ -106,6 +108,20 @@ const allUsers = asyncHandler(async (req, res) => {
   });
 
   res.json(users);
+});
+
+const findUser = asyncHandler(async (req, res) => {
+  const { userId } = req.query;
+
+  const user = await User.findOne({ _id: userId }).select(
+    "-password -unreadMessages"
+  );
+
+  if (!user) {
+    throw new Error("User is not found");
+  }
+
+  res.json(user);
 });
 
 const updateUserAvatar = asyncHandler(async (req, res) => {
@@ -179,4 +195,5 @@ module.exports = {
   allUsers,
   updateUserAvatar,
   updateUserName,
+  findUser,
 };

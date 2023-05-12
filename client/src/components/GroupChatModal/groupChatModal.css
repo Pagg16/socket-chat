@@ -113,7 +113,8 @@
   justify-content: center;
   font-weight: bold;
   font-size: 18px;
-}
+  height: 30px;
+} 
 
 .groupChatModal__selected-user-remove {
   border-radius: 1rem;
@@ -145,7 +146,8 @@
 .groupChatModal__input {
   width: 100%;
   font-size: 15px;
-  padding: 25px 0 5px;
+  margin-top: 25px;
+  padding: 0 0 5px;
   outline: none;
   border: none;
   border-bottom: 2px solid rgb(0, 0, 0);
@@ -158,6 +160,7 @@
   background-color: rgb(21, 201, 201);
   border: none;
   margin-left: 10px;
+  margin-top: auto;
   border-radius: 0.5rem;
   cursor: pointer;
   display: flex;

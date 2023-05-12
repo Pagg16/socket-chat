@@ -6,6 +6,7 @@ const { notFound, errorHandler } = require("./middlewares/errorMiddlewares");
 const chatRoutes = require("./routes/chatRoutes");
 const cors = require("./middlewares/cors");
 const messageRoutes = require("./routes/messageRoutes");
+const socketController = require("./socket/socket");
 
 dotenv.config();
 
@@ -24,4 +25,6 @@ app.use("/message", messageRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
-app.listen(PORT, console.log("Server started on port " + PORT));
+const server = app.listen(PORT, console.log("Server started on port " + PORT));
+
+socketController(server);

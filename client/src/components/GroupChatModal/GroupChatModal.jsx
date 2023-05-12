@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./groupChatModal.css";
 import baseImageUser from "../../images/user.png";
 import SearchUsersInput from "../SearchUserInput/SearchUserInput";
@@ -13,28 +13,42 @@ import {
 import { ChatState } from "../../context/chatProvider";
 import { chatData } from "../../utils/chatData";
 import ButtonLoader from "../ButtonLoader/ButtonLoader";
+import { SocketState } from "../../context/socketProvider";
 
 function GroupChatModal({
   isGroupChatModal: { isOpen, isUpdate },
   setIsGroupChatModal,
   user,
 }) {
+  const { socket } = SocketState();
   const { chats, setChats } = ChatState();
-  const { selectedChat, setSelectedChat } = ChatState();
+  const { selectedChat } = ChatState();
   const [isUpdateChat, setIsUpdateChat] = useState(false);
   const [chatName, setChatName] = useState("");
   const [inputSearch, setInputSearch] = useState("");
   const [searchUses, setSearchUsers] = useState([]);
-  const [selectedUsers, setSelectedUsers] = useState(() => {
-    if (isUpdate) {
-      return selectedChat.users;
-    }
-    return [user];
-  });
+
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  useMemo(() => {
+    setSelectedUsers(() => {
+      if (isUpdate) {
+        return [
+          selectedChat.users.find(
+            (user) => user._id === selectedChat.groupAdmin._id
+          ),
+          ...selectedChat.users.filter(
+            (user) => user._id !== selectedChat.groupAdmin._id
+          ),
+        ];
+      }
+      return [user];
+    });
+  }, [selectedChat]);
+
   const [clickUserID, setClickUserID] = useState("");
   const [isValidChatName, setIsValidChatName] = useState(true);
 
-  const isAdmin = selectedChat.groupAdmin?._id === user._id;
+  const isAdmin = selectedChat?.groupAdmin?._id === user._id;
 
   const colorSelectedUsers = useRef([]);
 
@@ -58,22 +72,23 @@ function GroupChatModal({
       .catch((e) => console.log(e));
   }
 
-  function updateChat(res) {
-    setSelectedChat(res.data);
-    setChats((state) => {
-      return state.map((chat) => {
-        if (chat._id === res.data._id) {
-          return res.data;
-        }
-        return chat;
-      });
-    });
-  }
-
   function updateNameChat() {
     setIsUpdateChat(true);
     renameGroup(selectedChat._id, chatName)
-      .then((res) => updateChat(res))
+      .then((res) => {
+        setChats((state) =>
+          state.map((chat) =>
+            chat._id === res.data._id
+              ? { ...chat, chatName: res.data.chatName }
+              : chat
+          )
+        );
+
+        socket.emit("renameChat", {
+          newName: chatName,
+          chatId: selectedChat._id,
+        });
+      })
       .catch((e) => console.log(e))
       .finally(() => setIsUpdateChat(false));
   }
@@ -81,23 +96,34 @@ function GroupChatModal({
   function removeGroupUser(userId) {
     groupRemove(selectedChat._id, userId)
       .then((res) => {
-        setSelectedUsers(res.data.users);
-        updateChat(res);
-      })
-      .catch((e) => console.log(e))
-      .finally(() => {
-        setClickUserID("");
-      });
-  }
-
-  function leaveGroup() {
-    groupRemove(selectedChat._id, user._id)
-      .then((res) => {
         setChats((state) => {
-          return state.filter((chat) => chat._id !== selectedChat._id);
+          if (userId === user._id) {
+            closeModal();
+            return state.filter((chat) => chat._id !== selectedChat._id);
+          }
+
+          return state.map((chat) => {
+            if (chat._id === res.data._id) {
+              const newUsers = chat.users.filter((user) => user._id !== userId);
+              setSelectedUsers([
+                newUsers.find(
+                  (user) => user._id === selectedChat.groupAdmin._id
+                ),
+                ...newUsers.filter(
+                  (user) => user._id !== selectedChat.groupAdmin._id
+                ),
+              ]);
+              return {
+                ...chat,
+                users: newUsers,
+              };
+            }
+
+            return chat;
+          });
         });
-        setSelectedChat({});
-        closeModal();
+
+        socket.emit("removeUserChat", { userId, chatId: selectedChat._id });
       })
       .catch((e) => console.log(e))
       .finally(() => {
@@ -108,7 +134,7 @@ function GroupChatModal({
   function addGroupUser(userId) {
     groupAdd(selectedChat._id, userId)
       .then((res) => {
-        updateChat(res);
+        socket.emit("addUserChat", { userId, chatId: selectedChat._id });
       })
       .catch((e) => {
         console.log(e);
@@ -144,9 +170,9 @@ function GroupChatModal({
             Create Group Chat
             <button
               onClick={() => createChat()}
-              disabled={!(selectedUsers.length > 2 && isValidChatName)}
+              disabled={!(selectedUsers.length > 2) || isValidChatName}
               className={`groupChatModal__crate-chat ${
-                selectedUsers.length === 2 &&
+                (selectedUsers.length === 2 || isValidChatName) &&
                 "groupChatModal__crate-chat_disabled"
               }`}
             >{`${
@@ -162,7 +188,7 @@ function GroupChatModal({
             </div>
             <button
               className="groupChatModal__chat-leave"
-              onClick={() => leaveGroup()}
+              onClick={() => removeGroupUser(user._id)}
             >
               Leave Group
             </button>
@@ -188,8 +214,7 @@ function GroupChatModal({
                 }}
               >
                 {userSelected.name}
-                {(user._id !== userSelected._id ||
-                  (user._id !== userSelected._id && isUpdate && isAdmin)) && (
+                {user._id !== userSelected._id && (!isUpdate || isAdmin) && (
                   <button
                     className="groupChatModal__selected-user-remove"
                     onClick={() => {
@@ -227,21 +252,16 @@ function GroupChatModal({
             type="text"
             placeholder={`${!isUpdate ? "Chat Name" : "Update Chat Name"}`}
             className={`groupChatModal__input ${
-              !isValidChatName && "groupChatModal__input_error"
+              !isUpdate ? isValidChatName && "groupChatModal__input_error" : ""
             }`}
             value={chatName}
-            onClick={() => {
-              if (!!!chatName) {
-                setIsValidChatName(false);
-              }
-            }}
             onChange={(e) => {
               const value = e.target.value;
               setChatName(value);
               if (value.length > 1 && value.length < 30) {
-                setIsValidChatName(true);
-              } else {
                 setIsValidChatName(false);
+              } else {
+                setIsValidChatName(true);
               }
             }}
           />

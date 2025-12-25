@@ -1,0 +1,418 @@
+const fileService = require("../services/file.Service");
+const config = require("config");
+const fs = require("fs");
+const User = require("../models/User");
+const File = require("../models/File");
+
+class FileController {
+  async createDir(req, res) {
+    try {
+      const { name, type, parent } = req.body;
+      const file = new File({ name, type, parent, user: req.user.id });
+      const parentFile = await File.findOne({ _id: parent });
+      if (!parentFile) {
+        file.path = name;
+        await fileService.createDir(file);
+      } else {
+        file.path = `${parentFile.path}\\${file.name}`;
+        await fileService.createDir(file);
+        parentFile.childs.push(file._id);
+        await parentFile.save();
+      }
+      await file.save();
+      return res.json(file);
+    } catch (e) {
+      console.log(e);
+      return res.status(400).json(e);
+    }
+  }
+
+  async getFiles(req, res) {
+    try {
+      const { sort } = req.query;
+      let files;
+      switch (sort) {
+        case "name":
+          files = await File.find({
+            user: req.user.id,
+            parent: req.query.parent,
+          }).sort({ name: 1 });
+          break;
+        case "type":
+          files = await File.find({
+            user: req.user.id,
+            parent: req.query.parent,
+          }).sort({ type: 1 });
+          break;
+        case "date":
+          files = await File.find({
+            user: req.user.id,
+            parent: req.query.parent,
+          }).sort({ date: 1 });
+          break;
+        default:
+          files = await File.find({
+            user: req.user.id,
+            parent: req.query.parent,
+          });
+          break;
+      }
+
+      return res.json(files);
+    } catch (e) {
+      console.log(e);
+      return res.status(500).json({ message: "Can not get files" });
+    }
+  }
+
+  async uploadFile(req, res) {
+    try {
+      const file = req.files.file;
+
+      const parent = await File.findOne({
+        user: req.user.id,
+        _id: req.body.parent,
+      });
+      const user = await User.findOne({ _id: req.user.id });
+
+      if (user.usedSpace + file.size > user.diskSpace) {
+        return res.status(400).json({ message: "There no space on the disk" });
+      }
+
+      user.usedSpace = user.usedSpace + file.size;
+
+      let path;
+
+      if (parent) {
+        path = `${config.get("filePath")}\\${user._id}\\${parent.path}\\${
+          file.name
+        }`;
+      } else {
+        path = `${config.get("filePath")}\\${user._id}\\${file.name}`;
+      }
+
+      if (fs.existsSync(path)) {
+        return res.status(400).json({ message: "File already exist" });
+      }
+
+      file.mv(path);
+
+      const type = file.name.split(".").pop();
+      let filePath = file.name;
+
+      if (parent) {
+        filePath = parent.path + "\\" + file.name;
+      }
+
+      const dbFile = new File({
+        name: file.name,
+        type,
+        size: file.size,
+        path: filePath,
+        parent: parent?._id,
+        user: user._id,
+      });
+
+      await dbFile.save();
+      await user.save();
+
+      res.json(dbFile);
+    } catch (e) {
+      console.log(e);
+      return res.status(500).json({ message: "Upload error" });
+    }
+  }
+
+  async downloadFile(req, res) {
+    try {
+      const file = await File.findOne({ _id: req.query.id, user: req.user.id });
+
+      const path = fileService.getPath(file);
+
+      if (fs.existsSync(path)) {
+        return res.download(path, file.name);
+      }
+
+      return res.status(400).json({ message: "Download error" });
+    } catch (e) {
+      console.log(e);
+      res.status(500).json({ message: "Download error" });
+    }
+  }
+
+  async deleteFile(req, res) {
+    try {
+      const file = await File.findOne({ _id: req.query.id, user: req.user.id });
+      if (!file) {
+        return res.status(400).json({ message: "file not found" });
+      }
+      fileService.deleteFile(file);
+      File.deleteOne({ _id: req.query.id, user: req.user.id });
+      return res.json({ message: "File was deleted" });
+    } catch (e) {
+      console.log(e);
+      return res.status(400).json({ message: "Dir is not empty" });
+    }
+  }
+
+  async searchFile(req, res) {
+    try {
+      const searchName = req.query.search;
+      let files = await File.find({ user: req.user.id });
+      files = files.filter((file) => file.name.includes(searchName));
+      return res.json(files);
+    } catch (e) {
+      console.log(e);
+      return res.status(400).json({ message: "Search error" });
+    }
+  }
+}
+
+module.exports = new FileController();
+const express = require("express");
+const mongoose = require("mongoose");
+const config = require("config");
+const fileUpload = require("express-fileupload");
+const corsMiddlweare = require("./middleweare/cors.middleweare");
+
+const authRouter = require("./routes/auth.routes");
+const fillRouter = require("./routes/file.routes");
+
+const app = express();
+const PORT = config.get("serverPort");
+
+app.use(fileUpload({}));
+app.use(corsMiddlweare);
+app.use(express.json());
+app.use("/api/auth", authRouter);
+app.use("/api/files", fillRouter);
+
+const start = async () => {
+  try {
+    await mongoose
+      .connect(config.get("dbUrl"))
+      .then(console.log("Connect mongoose"));
+
+    app.listen(PORT, () => {
+      console.log("Server started on ", PORT);
+    });
+  } catch (e) {
+    console.log("Error type ", e);
+  }
+};
+
+start();
+const jwt = require("jsonwebtoken");
+const config = require("config");
+
+module.exports = (req, res, next) => {
+  if (req.method == "OPTIONS") {
+    return next();
+  }
+
+  try {
+    const token = req.headers.authorization.split(" ")[1];
+
+    if (!token) {
+      return res.status(401).json({ message: "Autn error" });
+    }
+    const decoded = jwt.verify(token, config.get("secretKey"));
+    req.user = decoded;
+    next();
+  } catch (e) {
+    return res.status(401).json({ message: "Auth error" });
+  }
+};
+function cors(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, PUT, PATCH, POST, DELETE");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+  next();
+}
+
+module.exports = cors;
+const { model, Schema, ObjectId } = require("mongoose");
+
+const File = new Schema({
+  name: { type: String, required: true },
+  type: { type: String, required: true },
+  accessLink: { type: String },
+  size: { type: Number, default: 0 },
+  path: { type: String, default: "" },
+  date: { type: Date, default: Date.now() },
+  user: { type: ObjectId, ref: "User" },
+  parent: { type: ObjectId, ref: "File" },
+  childs: [{ type: ObjectId, ref: "File" }],
+});
+
+module.exports = model("File", File);
+const { Schema, model, ObjectId } = require("mongoose");
+
+const User = new Schema({
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  diskSpace: { type: Number, default: 1024 ** 3 * 10 },
+  usedSpace: { type: Number, default: 0 },
+  avatar: { type: String },
+  files: [{ type: ObjectId, ref: "File" }],
+});
+
+module.exports = model("User", User);
+const Router = require("express");
+const User = require("../models/User");
+const bcrypt = require("bcryptjs");
+const { check, validationResult } = require("express-validator");
+const jwt = require("jsonwebtoken");
+const config = require("config");
+const authMiddleweare = require("../middleweare/auth.middleware");
+const router = new Router();
+const fileService = require("../services/file.Service");
+const File = require("../models/File");
+
+router.post(
+  "/registration",
+  [
+    check("email", "Uncorrect email").isEmail(),
+    check(
+      "password",
+      "Password must be longer than 3 and shorter than 12"
+    ).isLength({ min: 3, max: 12 }),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ message: "Uncorrect request", errors });
+      }
+      const { email, password } = req.body;
+      const candidate = await User.findOne({ email });
+
+      if (candidate) {
+        return res
+          .status(400)
+          .json({ message: `User with email ${email} already exist` });
+      }
+      const hashPassword = await bcrypt.hash(password, 8);
+      const user = new User({ email, password: hashPassword });
+      await user.save();
+      await fileService.createDir(new File({ user: user.id, name: "" }));
+      return res.json({ message: "User was created" });
+    } catch (e) {
+      console.log(e);
+      res.send({ message: "Server error" });
+    }
+  }
+);
+
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not fond" });
+    }
+    const ifPassValid = bcrypt.compareSync(password, user.password);
+
+    if (!ifPassValid) {
+      return res.status(400).json({ message: "Invalid password" });
+    }
+    const token = jwt.sign({ id: user.id }, config.get("secretKey"), {
+      expiresIn: "1d",
+    });
+    return res.json({
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        diskSpace: user.diskSpace,
+        usedSpace: user.usedSpace,
+        avatar: user.avatar,
+      },
+    });
+  } catch (e) {
+    console.log(e);
+    res.send({ message: "Server error" });
+  }
+});
+
+router.get("/auth", authMiddleweare, async (req, res) => {
+  try {
+    const user = await User.findOne({ _id: req.user.id });
+    const token = jwt.sign({ id: user.id }, config.get("secretKey"), {
+      expiresIn: "1d",
+    });
+    return res.json({
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        diskSpace: user.diskSpace,
+        usedSpace: user.usedSpace,
+        avatar: user.avatar,
+      },
+    });
+  } catch (e) {
+    console.log(e);
+    res.send({ message: "Server error" });
+  }
+});
+
+module.exports = router;
+const Router = require("express");
+const router = new Router();
+const authMiddleware = require("../middleweare/auth.middleware");
+const fileController = require("../controllers/file.Controller");
+
+router.post("", authMiddleware, fileController.createDir);
+router.post("/upload", authMiddleware, fileController.uploadFile);
+router.get("", authMiddleware, fileController.getFiles);
+router.get("/download", authMiddleware, fileController.downloadFile);
+router.delete("/delete", authMiddleware, fileController.deleteFile);
+router.get("/search", authMiddleware, fileController.searchFile);
+
+module.exports = router;
+const fs = require("fs");
+const File = require("../models/File");
+const config = require("config");
+
+class FileService {
+  createDir(file) {
+    const filePath = `${config.get("filePath")}\\${file.user}`;
+    return new Promise((resolve, reject) => {
+      try {
+        if (!fs.existsSync(filePath)) {
+          fs.mkdirSync(filePath);
+          if (file.path.length > 0) fs.mkdirSync(filePath + `\\${file.path}`);
+
+          return resolve({ message: "File was created" });
+        } else {
+          if (!fs.existsSync(filePath + `\\${file.path}`)) {
+            fs.mkdirSync(filePath + `\\${file.path}`);
+
+            return resolve({ message: "File was created" });
+          } else {
+            return reject({ message: "File already exist" });
+          }
+        }
+      } catch (e) {
+        return reject({ message: "File error" });
+      }
+    });
+  }
+
+  getPath(file) {
+    return config.get("filePath") + "\\" + file.user + "\\" + file.path;
+  }
+
+  deleteFile(file) {
+    const path = this.getPath(file);
+    if (file.type === "dir") {
+      fs.rmdirSync(path);
+    } else {
+      fs.unlinkSync(path);
+    }
+  }
+}
+
+module.exports = new FileService();

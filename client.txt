@@ -1,0 +1,4926 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="description" content="Web site created using create-react-app" />
+  <title>React App</title>
+</head>
+
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
+
+</body>
+
+</html># Getting Started with Create React App
+
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+## Available Scripts
+
+In the project directory, you can run:
+
+### `npm start`
+
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+
+The page will reload when you make changes.\
+You may also see any lint errors in the console.
+
+### `npm test`
+
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+
+### `npm run build`
+
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
+
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
+
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+
+### `npm run eject`
+
+**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+
+If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+
+You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+
+## Learn More
+
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+
+To learn React, check out the [React documentation](https://reactjs.org/).
+
+### Code Splitting
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+
+### Analyzing the Bundle Size
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+
+### Making a Progressive Web App
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+
+### Advanced Configuration
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+
+### Deployment
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+
+### `npm run build` fails to minify
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+import axios from "axios";
+const baseUrl = "http://localhost:5000";
+
+const createAxiosInstance = () => {
+  const instance = axios.create();
+  instance.interceptors.request.use(function (config) {
+    const token = localStorage.getItem("jwt");
+    config.headers.Authorization = token ? `Bearer ${token}` : "";
+    return config;
+  });
+  return instance;
+};
+
+let axiosApi = createAxiosInstance();
+
+export function getChats() {
+  return axiosApi.get(baseUrl + "/chats");
+}
+
+export function singUp(name, email, password, pictureFile) {
+  const formData = new FormData();
+  formData.append("name", name);
+  formData.append("email", email);
+  formData.append("password", password);
+  formData.append("pictureFile", pictureFile);
+
+  return axiosApi.post(baseUrl + "/user/", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+}
+
+export function auth(email, password) {
+  return axiosApi.post(baseUrl + "/user/login", {
+    email,
+    password,
+  });
+}
+
+export function allUsers(query) {
+  return axiosApi.get(baseUrl + "/user/", {
+    params: { query },
+  });
+}
+
+export function updateUserAvatar(pictureFile) {
+  const formData = new FormData();
+  formData.append("pictureFile", pictureFile);
+  return axiosApi.put(baseUrl + "/user/image", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+}
+
+export function unpateUserDate(name, email) {
+  return axiosApi.put(baseUrl + "/user/update", {
+    name,
+    email,
+  });
+}
+
+export function findUserById(userId) {
+  return axiosApi.get(baseUrl + "/user/findUser", {
+    params: { userId },
+  });
+}
+
+export function accessChat(userId) {
+  return axiosApi.post(baseUrl + "/chat/", {
+    userId,
+  });
+}
+
+export function fetchChats() {
+  return axiosApi.get(baseUrl + "/chat/");
+}
+
+export function createGroupChat(users, name) {
+  return axiosApi.post(baseUrl + "/chat/group", {
+    users: JSON.stringify(users.map((user) => user._id)),
+    name,
+  });
+}
+
+export function renameGroup(chatId, chatName) {
+  return axiosApi.put(baseUrl + "/chat/rename", {
+    chatId,
+    chatName,
+  });
+}
+
+export function groupRemove(chatId, userId) {
+  return axiosApi.put(baseUrl + "/chat/groupremove", {
+    chatId,
+    userId,
+  });
+}
+
+export function groupAdd(chatId, userId) {
+  return axiosApi.put(baseUrl + "/chat/groupadd", {
+    chatId,
+    userId,
+  });
+}
+
+export function findChat(chatId) {
+  return axiosApi.get(baseUrl + "/chat/findGroup", {
+    params: { chatId },
+  });
+}
+
+export function allMassage(chatId) {
+  return axiosApi.post(`${baseUrl}/message/${chatId}`);
+}
+
+export function sendMassage(content, chatId) {
+  return axiosApi.post(baseUrl + "/message", {
+    content,
+    chatId,
+  });
+}
+
+export function updateTokenAndCreateAxiosInstance() {
+  const token = localStorage.getItem("jwt");
+  if (token) {
+    axiosApi = createAxiosInstance();
+  }
+}
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  background-color: rgb(92, 92, 92);
+  background-image: url("../../images/background.jpg");
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+import { useState } from "react";
+import Chats from "../Chats/Chats";
+import LoginSingUp from "../LoginSingUp/LoginSingUp";
+import Popup from "../Popup/Popup";
+import "./app.css";
+import { Route, Routes } from "react-router-dom";
+import { isVisible } from "@testing-library/user-event/dist/utils";
+import Loader from "../Loader/Loader";
+
+function App() {
+  const [popup, setPopup] = useState({
+    text: "",
+    isVisible: false,
+  });
+  // localStorage.clear();
+  return (
+    <div className="app">
+      <Routes>
+        <Route exact path="/" element={<LoginSingUp setPopup={setPopup} />} />
+        <Route path="/chats" element={<Chats setPopup={setPopup} />} />
+      </Routes>
+      <Popup popup={popup} setPopup={setPopup} />
+      {/* <Loader /> */}
+    </div>
+  );
+}
+
+export default App;
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.buttonLoader {
+  border: 3px solid #fff;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+import React from "react";
+import "./buttonLoader.css";
+
+function ButtonLoader({ addClass }) {
+  return <span className={`buttonLoader ${!!addClass ? addClass : ""}`}></span>;
+}
+
+export default ButtonLoader;
+.chatBox {
+  height: 100%;
+  flex: 2;
+  background-color: white;
+  margin-left: 10px;
+  box-sizing: border-box;
+  padding: 5px;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chatBox__header {
+  width: 100%;
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+}
+
+.chatBox__chat-name {
+  height: 100%;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  max-width: 20%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.chatBox__chat-typing-container {
+  height: 100%;
+  margin-left: 10%;
+  font-size: 18px;
+}
+
+.chatBox__chat-typing-users {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  white-space: nowrap;
+}
+
+@keyframes typing-dots {
+  0% {
+    content: ".";
+  }
+  33% {
+    content: "..";
+  }
+  66% {
+    content: "...";
+  }
+  100% {
+    content: ".";
+  }
+}
+.chatBox__chat-typing-users__dots::after {
+  content: "";
+  animation: typing-dots 1s steps(4, end) infinite;
+}
+
+.chatBox__number-users {
+  font-size: 17px;
+  font-weight: bold;
+}
+
+.chatBox__number-users-num {
+  font-size: 23px;
+}
+
+.chatBox__chat-setting {
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chatBox__chat-setting-icon {
+  width: 40px;
+}
+
+.chatBox__container {
+  flex: 2;
+  background-color: rgb(219, 219, 219);
+  width: 100%;
+  border-radius: 0.5rem;
+  box-sizing: border-box;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.chatBox__messages-empty {
+  width: 100%;
+  flex: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 25px;
+}
+
+.chatBox__input-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  position: absolute;
+  justify-content: space-between;
+  min-height: 50px;
+  max-height: 70vh;
+  transform: scale(-1, -1);
+  resize: vertical;
+  color: transparent;
+  overflow: hidden;
+  background-color: rgb(219, 219, 219);
+  border-radius: 0.5rem;
+  border: 2px solid gray;
+  outline: none;
+  box-sizing: border-box;
+  padding: 5px;
+  bottom: 0;
+}
+
+.chatBox__input-container_focus {
+  border: 2px solid rgb(0, 174, 255);
+}
+
+.chatBox__container-textarea {
+  height: 100%;
+  width: 100%;
+  max-width: 100%;
+  outline: none;
+  transform: scale(-1, -1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-rendering: optimizeLegibility;
+  letter-spacing: 0.05em;
+}
+
+.chatBox__container-textarea-text {
+  width: 100%;
+  min-height: 100%;
+  max-height: 100%;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  overflow: hidden;
+  resize: vertical;
+}
+
+.chatBox__container-textarea-text::-webkit-resizer {
+  display: none;
+}
+
+.chatBox__container-input-send-icon {
+  height: 20px;
+  width: 20px;
+  cursor: pointer;
+}
+
+.chatBox__start-mesasge {
+  width: 100%;
+  height: 100%;
+  font-size: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chatBox__messages-container {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.chatBox__messages {
+  position: absolute;
+  overflow: auto;
+  bottom: 60px;
+  max-height: 93%;
+  width: 100%;
+}
+
+.chatBox__my-message {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.chatBox__message {
+  width: 100%;
+  white-space: pre-wrap;
+}
+
+.chatBox__message-content {
+  background-color: rgb(139, 162, 224);
+  padding: 10px;
+  border-radius: 1rem;
+}
+
+.chatBox__sender-message {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.chatBox__sender-image-container {
+  position: relative;
+  height: 40px;
+  min-width: 40px;
+  margin-right: 5px;
+  overflow: hidden;
+  border-radius: 10rem;
+}
+
+.chatBox__sender-image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 100%;
+}
+
+.chatBox__loaderMessage {
+  width: 20vh;
+  height: 20vh;
+  border: 7px solid #000000;
+  border-bottom-color: transparent;
+}
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import "./chatBox.css";
+import { ChatState } from "../../context/chatProvider";
+import settingIcon from "../../images/settings.png";
+import { chatData } from "../../utils/chatData";
+import sendMessageIocn from "../../images/send-message.png";
+import { allMassage, sendMassage } from "../../api/api";
+import useComponentVisible from "../OutClick/OutClick";
+import { createImageBuffer } from "../../utils/createImadeBuffer";
+import defaultUser from "../../images/user.png";
+import ButtonLoader from "../ButtonLoader/ButtonLoader";
+import deleteUserIcon from "../../images/garbage.png";
+import { SocketState } from "../../context/socketProvider";
+
+function ChatBox({ raisingChat, user, setIsGroupChatModal }) {
+  const [ref, isComponentVisible, setIsComponentVisible] =
+    useComponentVisible(false);
+
+  const {
+    selectedChat,
+    chatMessage,
+    setChatMessage,
+    setUnreadMessages,
+    setChats,
+  } = ChatState();
+  const [inputMessage, setInputMessage] = useState("");
+  const [attemptSendMessage, setAttemptSendMessage] = useState(false);
+  const [chatMessageLoading, setChatMessageLoading] = useState(false);
+  const { socket } = SocketState();
+  const [userTyping, setUserTyping] = useState({});
+
+  const keyPress = useRef({ shiftPress: false, enterPress: false });
+  const messages = useRef(null);
+  const previosChatId = useRef(null);
+  const timerTypingMessages = useRef({
+    isCanSend: true,
+    timer: null,
+  });
+
+  const userImages = useMemo(() => {
+    if (!!!selectedChat) return;
+    const users = selectedChat.users;
+    const userImages = {};
+
+    for (let i = 0; i < users.length; i++) {
+      if (users[i]._id !== user._id) {
+        userImages[users[i]._id] =
+          !!users[i].image && !!users[i].image.data
+            ? createImageBuffer(
+                users[i].image?.data?.data,
+                users[i].image?.contentType
+              )
+            : defaultUser;
+      }
+    }
+
+    return userImages;
+  }, [selectedChat]);
+
+  useEffect(() => {
+    if (!!messages.current) {
+      messages.current.scrollTop = messages.current.scrollHeight;
+    }
+  }, [chatMessage]);
+
+  useEffect(() => {
+    if (!!!socket) return;
+
+    socket.on("userTyping", (chatUserDate) => {
+      const { userName, userId } = chatUserDate;
+
+      if (userTyping.hasOwnProperty(userId)) {
+        setUserTyping((state) => {
+          const updatedTyping = {
+            ...state,
+            [userId]: {
+              ...state[userId],
+              userName: userName,
+              delayTimer: setTimeout(() => {
+                setUserTyping((prevState) => {
+                  const newState = { ...prevState };
+                  delete newState[userId];
+                  return newState;
+                });
+              }, 3000),
+            },
+          };
+
+          if (state[userId]?.delayTimer) {
+            clearTimeout(state[userId].delayTimer);
+          }
+
+          return updatedTyping;
+        });
+      } else {
+        userTyping[userId] = {};
+        setUserTyping((state) => ({
+          ...state,
+          [userId]: {
+            ...userTyping[userId],
+            userName: userName,
+            delayTimer: setTimeout(() => {
+              setUserTyping((prevState) => {
+                const newState = { ...prevState };
+                delete newState[userId];
+                return newState;
+              });
+            }, 3000),
+          },
+        }));
+      }
+    });
+
+    return () => socket.close();
+  }, [socket]);
+
+  useEffect(() => {
+    if (!!!selectedChat || previosChatId.current === selectedChat?._id) return;
+    setInputMessage("");
+    setChatMessage([]);
+    setUserTyping({});
+    if (!!previosChatId.current && !!socket) {
+      socket.emit("leaveChat", previosChatId.current);
+    }
+    previosChatId.current = selectedChat._id;
+    setChatMessageLoading(true);
+    allMassage(selectedChat._id)
+      .then((res) => {
+        setUnreadMessages((state) => {
+          const newState = { ...state };
+          delete newState[selectedChat._id];
+          return newState;
+        });
+        socket.emit("joinChat", selectedChat._id);
+        setChatMessage(res.data);
+      })
+      .catch((e) => console.log(e))
+      .finally(() => setChatMessageLoading(false));
+  }, [selectedChat]);
+
+  function sendMessageChat() {
+    setAttemptSendMessage(true);
+    setInputMessage("");
+    sendMassage(inputMessage, selectedChat._id)
+      .then((res) => {
+        setChatMessage((state) => [...state, res.data]);
+        raisingChat(res.data.chat._id);
+        socket.emit("newMessage", res.data);
+      })
+      .catch((e) => console.log(e))
+      .finally(() => {
+        setAttemptSendMessage(false);
+      });
+  }
+
+  const userTypingArr = useMemo(
+    () =>
+      Object.entries(userTyping).map(([id, { userName }]) => ({
+        id,
+        userName,
+      })),
+    [userTyping]
+  );
+
+  return (
+    <div className="chatBox">
+      {!!selectedChat && (
+        <>
+          <div className="chatBox__header">
+            <div className="chatBox__chat-name">
+              {selectedChat.isGroupChat
+                ? selectedChat.chatName
+                : chatData(selectedChat, user).opponent.name}
+
+              <div className="chatBox__chat-typing-container">
+                {userTypingArr.length > 0 && (
+                  <div className="chatBox__chat-typing-users">
+                    {selectedChat.isGroupChat
+                      ? `${userTypingArr
+                          .slice(0, 3)
+                          .map((user) => user.userName)
+                          .join(", ")} ${
+                          userTypingArr.length > 3
+                            ? `and more ${userTypingArr.length - 3}`
+                            : ""
+                        } is typing messages`
+                      : `is typing message`}
+                    <span className="chatBox__chat-typing-users__dots"></span>
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* {selectedChat.isGroupChat && (
+              <div className="chatBox__number-users">
+                Users{" "}
+                <span className="chatBox__number-users-num">
+                  {selectedChat.users.length}
+                </span>
+              </div>
+            )} */}
+            {selectedChat.isGroupChat && (
+              <button
+                className="chatBox__chat-setting"
+                onClick={() =>
+                  setIsGroupChatModal((state) => ({
+                    ...state,
+                    isOpen: true,
+                    isUpdate: true,
+                  }))
+                }
+              >
+                <img
+                  className="chatBox__chat-setting-icon"
+                  src={settingIcon}
+                  alt="setting-icon"
+                />
+              </button>
+            )}
+          </div>
+          <div className="chatBox__container">
+            {chatMessageLoading ? (
+              <ButtonLoader addClass={"chatBox__loaderMessage"} />
+            ) : (
+              <div className="chatBox__messages-container">
+                {chatMessage.length > 0 ? (
+                  <div className="chatBox__messages" ref={messages}>
+                    {chatMessage.map((message, index) => {
+                      const isMyMessage = message.sender._id === user._id;
+
+                      const senderAvatar = (() => {
+                        if (
+                          isMyMessage ||
+                          (!!chatMessage[index + 1] &&
+                            chatMessage[index].sender._id ===
+                              chatMessage[index + 1].sender._id)
+                        ) {
+                          return false;
+                        }
+
+                        const image = userImages[message.sender._id];
+
+                        return !!image ? image : deleteUserIcon;
+                      })();
+
+                      return (
+                        <div className="chatBox__message" key={message._id}>
+                          {isMyMessage ? (
+                            <div className="chatBox__my-message">
+                              <div className="chatBox__message-content">
+                                {message.content}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="chatBox__sender-message">
+                              <div className="chatBox__sender-image-container">
+                                {senderAvatar && (
+                                  <img
+                                    className="chatBox__sender-image"
+                                    src={senderAvatar}
+                                    alt="sender-avatar"
+                                  />
+                                )}
+                              </div>
+
+                              <div className="chatBox__message-content">
+                                {message.content}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <span className="chatBox__messages-empty">
+                    No messages yet, be the first to write
+                  </span>
+                )}
+              </div>
+            )}
+            <div
+              className={`chatBox__input-container ${
+                isComponentVisible && "chatBox__input-container_focus"
+              }`}
+              ref={ref}
+            >
+              <div type="text" className="chatBox__container-textarea">
+                <textarea
+                  wrap="on"
+                  placeholder="Enter your message"
+                  className="chatBox__container-textarea-text"
+                  onKeyDown={(e) => {
+                    if (e.key === "Shift") {
+                      return (keyPress.shiftPress = true);
+                    }
+
+                    if (e.key === "Enter") {
+                      return (keyPress.enterPress = true);
+                    }
+                  }}
+                  onKeyUp={(e) => {
+                    if (e.key === "Shift") {
+                      return (keyPress.shiftPress = false);
+                    }
+
+                    if (e.key === "Enter") {
+                      return (keyPress.enterPress = false);
+                    }
+                  }}
+                  onChange={(e) => {
+                    if (
+                      keyPress.enterPress &&
+                      !keyPress.shiftPress &&
+                      inputMessage.trim() !== ""
+                    ) {
+                      sendMessageChat();
+                      return e.preventDefault();
+                    } else {
+                      if (timerTypingMessages.current.isCanSend) {
+                        socket.emit("typingMessage", {
+                          userName: user.name,
+                          userId: user._id,
+                          chatId: selectedChat._id,
+                        });
+
+                        timerTypingMessages.current.isCanSend = false;
+
+                        timerTypingMessages.current.timer = setTimeout(() => {
+                          timerTypingMessages.current.isCanSend = true;
+                        }, 1000);
+                      }
+
+                      return setInputMessage(e.target.value);
+                    }
+                  }}
+                  value={inputMessage}
+                  onClick={() => setIsComponentVisible(true)}
+                />
+
+                <img
+                  src={sendMessageIocn}
+                  className="chatBox__container-input-send-icon"
+                  alt="send-icon"
+                  onClick={() => {
+                    if (!!!inputMessage) return;
+                    sendMessageChat();
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+      {!!!selectedChat && (
+        <span className="chatBox__start-mesasge">Click on chat to start</span>
+      )}
+    </div>
+  );
+}
+
+export default ChatBox;
+.chats {
+  display: flex;
+  flex-direction: column;
+}
+
+.chats-container {
+  box-sizing: border-box;
+  padding: 0 5px 5px;
+  flex: 2;
+  display: flex;
+}
+import React, { useEffect, useMemo, useState } from "react";
+import { fetchChats, findChat, findUserById, getChats } from "../../api/api";
+import SidePanel from "../SidePanel/SidePanel";
+import MyChats from "../MyChats/MyChats";
+import ChatBox from "../ChatBox/ChatBox";
+import { UserState } from "../../context/userProvider";
+import { ChatState } from "../../context/chatProvider";
+
+import "./chats.css";
+import GroupChatModal from "../GroupChatModal/GroupChatModal";
+import { SocketState } from "../../context/socketProvider";
+
+function Chats({ setPopup }) {
+  const { user } = UserState();
+  const {
+    chats,
+    setChats,
+    setSelectedChat,
+    selectedChat,
+    setChatMessage,
+    setUnreadMessages,
+  } = ChatState();
+  const { socket } = SocketState();
+  const [isGroupChatModal, setIsGroupChatModal] = useState({
+    isOpen: false,
+    isUpdate: false,
+  });
+
+  function raisingChat(chatId) {
+    if (chats.indexOf(chatId) === 0) return;
+    setChats((chats) => {
+      const chatIndex = chats.findIndex((chat) => chat._id === chatId);
+      if (chatIndex !== -1 && chatIndex !== 0) {
+        const chat = chats[chatIndex];
+        const updatedChats = [
+          chat,
+          ...chats.slice(0, chatIndex),
+          ...chats.slice(chatIndex + 1),
+        ];
+        return updatedChats;
+      }
+      return chats;
+    });
+  }
+
+  useEffect(() => {
+    if (!!!selectedChat) return;
+    setSelectedChat((state) => {
+      return chats.find((chat) => chat._id === state._id);
+    });
+  }, [chats]);
+
+  useEffect(() => {
+    if (!!!socket) return;
+
+    socket.on("message", (message) => {
+      raisingChat(message.chat._id);
+
+      if (message.chat._id === selectedChat?._id) {
+        return setChatMessage((state) => [...state, message]);
+      }
+
+      setUnreadMessages((state) => {
+        if (state[message.chat._id]) {
+          return {
+            ...state,
+            [message.chat._id]: state[message.chat._id] + 1,
+          };
+        }
+        return { ...state, [message.chat._id]: 1 };
+      });
+
+      setChats((chats) =>
+        chats.map((chat) => {
+          if (chat._id === message.chat._id) {
+            return {
+              ...chat,
+              lastedMessage: message,
+            };
+          }
+          return chat;
+        })
+      );
+    });
+
+    return () => socket.off("message");
+  }, [socket, selectedChat]);
+
+  useEffect(() => {
+    if (!!!socket) return;
+
+    socket.on("newChatName", ({ newName, chatId }) => {
+      setChats((state) =>
+        state.map((chat) =>
+          chat._id === chatId ? { ...chat, chatName: newName } : chat
+        )
+      );
+    });
+
+    socket.on("deleteUserChat", ({ userId, chatId }) => {
+      setChats((state) => {
+        if (userId === user._id) {
+          return state.filter((chat) => chat._id !== chatId);
+        }
+
+        return state.map((chat) => {
+          if (chat._id === chatId) {
+            const newUsers = chat.users.filter((user) => user._id !== userId);
+
+            return {
+              ...chat,
+              users: newUsers,
+            };
+          }
+
+          return chat;
+        });
+      });
+    });
+
+    socket.on("addUsersChat", ({ userId, chatId }) => {
+      if (user._id === userId) {
+        return findChat(chatId)
+          .then((res) => {
+            setChats((state) => [res.data, ...state]);
+          })
+          .catch((e) => console.log(e));
+      }
+
+      return findUserById(userId)
+        .then((res) => {
+          setChats((state) =>
+            state.map((chat) =>
+              chat._id === chatId
+                ? {
+                    ...chat,
+                    users: [...chat.users, res.data],
+                  }
+                : chat
+            )
+          );
+        })
+        .catch((e) => console.log(e));
+    });
+  }, [socket]);
+
+  useEffect(() => {
+    if (!!user) {
+      fetchChats()
+        .then((res) => {
+          setChats(res.data);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    }
+  }, [user]);
+
+  return (
+    <div className="chats">
+      {!!user && <SidePanel user={user} setPopup={setPopup} />}
+      <div className="chats-container">
+        {!!user && (
+          <MyChats
+            chats={chats}
+            user={user}
+            setIsGroupChatModal={(param) =>
+              setIsGroupChatModal((state) => ({ ...state, isOpen: param }))
+            }
+          />
+        )}
+        {!!user && (
+          <ChatBox
+            raisingChat={raisingChat}
+            user={user}
+            setIsGroupChatModal={setIsGroupChatModal}
+          />
+        )}
+      </div>
+      {!!user && isGroupChatModal.isOpen && (
+        <GroupChatModal
+          isGroupChatModal={isGroupChatModal}
+          setIsGroupChatModal={setIsGroupChatModal}
+          user={user}
+        />
+      )}
+    </div>
+  );
+}
+
+export default Chats;
+.groupChatModal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.301);
+  opacity: 0;
+  z-index: -1;
+}
+
+.groupChatModal_visible {
+  opacity: 1;
+  z-index: 1;
+}
+
+.groupChatModal__container {
+  position: fixed;
+  left: 50%;
+  top: 20vh;
+  transform: translateX(-50%);
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 40%;
+  max-width: 400px;
+  box-sizing: border-box;
+  padding: 10px 10px 35px;
+  border-radius: 1rem;
+
+  max-height: calc(100vh - 20vh);
+}
+
+.groupChatModal__container_bottom {
+  padding-bottom: 5px;
+}
+
+.groupChatModal__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.groupChatModal__crate-chat {
+  background-color: rgb(13, 135, 250);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  font-size: 15px;
+  margin-left: auto;
+}
+
+.groupChatModal__chat-name-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
+}
+
+.groupChatModal__chat-name {
+  font-size: 30px;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.groupChatModal__chat-leave {
+  background-color: rgb(255, 59, 59);
+  border: none;
+  cursor: pointer;
+  border-radius: 0.5rem;
+  box-sizing: border-box;
+  padding: 8px 8px;
+  color: white;
+  margin-left: 5px;
+  white-space: nowrap;
+}
+
+.groupChatModal__crate-chat_disabled {
+  background-color: rgb(150, 150, 150);
+}
+
+.groupChatModal__selected-users {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+  min-width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background-color: rgb(231, 231, 231);
+  border-radius: 0.5rem;
+  box-sizing: border-box;
+  padding: 2px 5px;
+  padding-bottom: 8px;
+}
+
+.groupChatModal__selected-user {
+  margin-right: 8px;
+  border-radius: 1rem;
+  box-sizing: border-box;
+  padding: 2px 2px 2px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 18px;
+  height: 30px;
+} 
+
+.groupChatModal__selected-user-remove {
+  border-radius: 1rem;
+  border: none;
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.groupChatModal__bts-close {
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  padding: 3px 6px;
+  margin: 0;
+  border-radius: 1rem;
+}
+
+.groupChatModal__input-container {
+  width: 100%;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+}
+
+.groupChatModal__input {
+  width: 100%;
+  font-size: 15px;
+  margin-top: 25px;
+  padding: 0 0 5px;
+  outline: none;
+  border: none;
+  border-bottom: 2px solid rgb(0, 0, 0);
+}
+
+.groupChatModal__input-update-bts {
+  height: 30px;
+  width: 70px;
+  box-sizing: border-box;
+  background-color: rgb(21, 201, 201);
+  border: none;
+  margin-left: 10px;
+  margin-top: auto;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.groupChatModal__input:focus {
+  border-bottom: 2px solid blue;
+}
+
+.groupChatModal__input_error {
+  border-color: red;
+}
+
+.groupChatModal__input_error:focus {
+  border-color: red;
+}
+
+.groupChatModal__users {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.groupChatModal__user {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  margin-top: 5px;
+  border-radius: 0.5rem;
+  box-sizing: border-box;
+  padding: 5px;
+  width: 90%;
+  cursor: pointer;
+  background-color: rgb(238, 238, 238);
+}
+
+.groupChatModal__selected-user-remove {
+  margin-left: 5px;
+}
+
+.groupChatModal__user-image-container {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  border-radius: 10rem;
+  border: 1px dotted gray;
+  overflow: hidden;
+  margin-right: 20px;
+}
+
+.groupChatModal__user-image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 100%;
+}
+
+.groupChatModal__user-data-container {
+  font-size: 20px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  height: 100%;
+  display: flex;
+  align-items: start;
+  justify-content: space-evenly;
+  flex-direction: column;
+}
+
+.groupChatModal__user-data {
+  white-space: nowrap; /* Запрещаем перенос строк */
+  overflow: hidden; /* Обрезаем все, что не помещается в область */
+  text-overflow: ellipsis; /* Добавляем многоточие */
+}
+
+.groupChatModal__user-data-type {
+  font-weight: bold;
+}
+
+.groupChatModal__loader {
+  width: 25px;
+  height: 25px;
+  border: 3px solid #000000;
+  border-bottom-color: transparent;
+}
+
+.groupChatModal__loader-user {
+  width: 20px;
+  height: 20px;
+  border: 3px solid #000000;
+  border-bottom-color: transparent;
+}
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import "./groupChatModal.css";
+import baseImageUser from "../../images/user.png";
+import SearchUsersInput from "../SearchUserInput/SearchUserInput";
+import { createImageBuffer } from "../../utils/createImadeBuffer";
+import { randomColor } from "randomcolor";
+import {
+  createGroupChat,
+  groupAdd,
+  groupRemove,
+  renameGroup,
+} from "../../api/api";
+import { ChatState } from "../../context/chatProvider";
+import { chatData } from "../../utils/chatData";
+import ButtonLoader from "../ButtonLoader/ButtonLoader";
+import { SocketState } from "../../context/socketProvider";
+
+function GroupChatModal({
+  isGroupChatModal: { isOpen, isUpdate },
+  setIsGroupChatModal,
+  user,
+}) {
+  const { socket } = SocketState();
+  const { chats, setChats } = ChatState();
+  const { selectedChat } = ChatState();
+  const [isUpdateChat, setIsUpdateChat] = useState(false);
+  const [chatName, setChatName] = useState("");
+  const [inputSearch, setInputSearch] = useState("");
+  const [searchUses, setSearchUsers] = useState([]);
+
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  useMemo(() => {
+    setSelectedUsers(() => {
+      if (isUpdate) {
+        return [
+          selectedChat.users.find(
+            (user) => user._id === selectedChat.groupAdmin._id
+          ),
+          ...selectedChat.users.filter(
+            (user) => user._id !== selectedChat.groupAdmin._id
+          ),
+        ];
+      }
+      return [user];
+    });
+  }, [selectedChat]);
+
+  const [clickUserID, setClickUserID] = useState("");
+  const [isValidChatName, setIsValidChatName] = useState(true);
+
+  const isAdmin = selectedChat?.groupAdmin?._id === user._id;
+
+  const colorSelectedUsers = useRef([]);
+
+  function closeModal() {
+    setIsGroupChatModal((state) => {
+      if (isUpdate) {
+        return { ...state, isOpen: false, isUpdate: false };
+      }
+      return { ...state, isOpen: false };
+    });
+  }
+
+  function createChat() {
+    createGroupChat(selectedUsers, chatName)
+      .then((res) => {
+        if (!chats.find((chat) => chat._id === res.data._id)) {
+          setChats((state) => [res.data, ...state]);
+        }
+      })
+      .finally(() => closeModal())
+      .catch((e) => console.log(e));
+  }
+
+  function updateNameChat() {
+    setIsUpdateChat(true);
+    renameGroup(selectedChat._id, chatName)
+      .then((res) => {
+        setChats((state) =>
+          state.map((chat) =>
+            chat._id === res.data._id
+              ? { ...chat, chatName: res.data.chatName }
+              : chat
+          )
+        );
+
+        socket.emit("renameChat", {
+          newName: chatName,
+          chatId: selectedChat._id,
+        });
+      })
+      .catch((e) => console.log(e))
+      .finally(() => setIsUpdateChat(false));
+  }
+
+  function removeGroupUser(userId) {
+    groupRemove(selectedChat._id, userId)
+      .then((res) => {
+        setChats((state) => {
+          if (userId === user._id) {
+            closeModal();
+            return state.filter((chat) => chat._id !== selectedChat._id);
+          }
+
+          return state.map((chat) => {
+            if (chat._id === res.data._id) {
+              const newUsers = chat.users.filter((user) => user._id !== userId);
+              setSelectedUsers([
+                newUsers.find(
+                  (user) => user._id === selectedChat.groupAdmin._id
+                ),
+                ...newUsers.filter(
+                  (user) => user._id !== selectedChat.groupAdmin._id
+                ),
+              ]);
+              return {
+                ...chat,
+                users: newUsers,
+              };
+            }
+
+            return chat;
+          });
+        });
+
+        socket.emit("removeUserChat", { userId, chatId: selectedChat._id });
+      })
+      .catch((e) => console.log(e))
+      .finally(() => {
+        setClickUserID("");
+      });
+  }
+
+  function addGroupUser(userId) {
+    groupAdd(selectedChat._id, userId)
+      .then((res) => {
+        socket.emit("addUserChat", { userId, chatId: selectedChat._id });
+      })
+      .catch((e) => {
+        console.log(e);
+        setClickUserID("");
+        setSelectedUsers((state) => {
+          return state.filter((user) => user._id !== userId);
+        });
+      })
+      .finally(() => {
+        setClickUserID("");
+      });
+  }
+
+  return (
+    <div
+      className={`groupChatModal ${isOpen && "groupChatModal_visible"} `}
+      onClick={() => closeModal()}
+    >
+      <div
+        className={`groupChatModal__container ${
+          searchUses.length > 0 && "groupChatModal__container_bottom"
+        }`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          className="groupChatModal__bts-close"
+          onClick={() => closeModal()}
+        >
+          Х
+        </button>
+        {!isUpdate ? (
+          <div className="groupChatModal__header">
+            Create Group Chat
+            <button
+              onClick={() => createChat()}
+              disabled={!(selectedUsers.length > 2) || isValidChatName}
+              className={`groupChatModal__crate-chat ${
+                (selectedUsers.length === 2 || isValidChatName) &&
+                "groupChatModal__crate-chat_disabled"
+              }`}
+            >{`${
+              selectedUsers.length === 2 ? "Minimum 3 users" : "Create Chat"
+            }`}</button>
+          </div>
+        ) : (
+          <div className="groupChatModal__chat-name-container">
+            <div className="groupChatModal__chat-name">
+              {selectedChat.isGroupChat
+                ? selectedChat.chatName
+                : chatData(selectedChat, user).opponent.name}
+            </div>
+            <button
+              className="groupChatModal__chat-leave"
+              onClick={() => removeGroupUser(user._id)}
+            >
+              Leave Group
+            </button>
+          </div>
+        )}
+
+        <div className="groupChatModal__selected-users">
+          {selectedUsers.map((userSelected, index) => {
+            if (colorSelectedUsers.current.length < selectedUsers.length) {
+              colorSelectedUsers.current.push(
+                randomColor({
+                  luminosity: "light",
+                })
+              );
+            }
+
+            return (
+              <div
+                key={userSelected._id}
+                className="groupChatModal__selected-user"
+                style={{
+                  backgroundColor: `${colorSelectedUsers.current[index]}`,
+                }}
+              >
+                {userSelected.name}
+                {user._id !== userSelected._id && (!isUpdate || isAdmin) && (
+                  <button
+                    className="groupChatModal__selected-user-remove"
+                    onClick={() => {
+                      if (isUpdate) {
+                        setClickUserID(userSelected._id);
+                        return removeGroupUser(userSelected._id);
+                      }
+
+                      colorSelectedUsers.current =
+                        colorSelectedUsers.current.filter(
+                          (elem, indexElem) => indexElem !== index
+                        );
+
+                      return setSelectedUsers((state) => {
+                        return state.filter(
+                          (userDate) => userDate._id !== userSelected._id
+                        );
+                      });
+                    }}
+                  >
+                    {clickUserID === userSelected._id ? (
+                      <ButtonLoader addClass={"groupChatModal__loader-user"} />
+                    ) : (
+                      "X"
+                    )}
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="groupChatModal__input-container">
+          <input
+            type="text"
+            placeholder={`${!isUpdate ? "Chat Name" : "Update Chat Name"}`}
+            className={`groupChatModal__input ${
+              !isUpdate ? isValidChatName && "groupChatModal__input_error" : ""
+            }`}
+            value={chatName}
+            onChange={(e) => {
+              const value = e.target.value;
+              setChatName(value);
+              if (value.length > 1 && value.length < 30) {
+                setIsValidChatName(false);
+              } else {
+                setIsValidChatName(true);
+              }
+            }}
+          />
+
+          {isUpdate && (
+            <button
+              className="groupChatModal__input-update-bts"
+              disabled={!(chatName.length > 1 && chatName.length < 30)}
+              onClick={() => updateNameChat()}
+            >
+              {isUpdateChat ? (
+                <ButtonLoader addClass={"groupChatModal__loader"} />
+              ) : (
+                "Update"
+              )}
+            </button>
+          )}
+        </div>
+        <SearchUsersInput
+          isOpenSerch={isOpen}
+          setSearchUsers={setSearchUsers}
+          inputSearch={inputSearch}
+          setInputSearch={setInputSearch}
+        />
+        <div className="groupChatModal__users">
+          {searchUses
+            .filter((user) => selectedUsers[0]._id !== user._id)
+            .map((user) => {
+              let image;
+              if (!!user.image) {
+                image = createImageBuffer(user.image?.data.data);
+              } else {
+                image = baseImageUser;
+              }
+
+              return (
+                <div
+                  className="groupChatModal__user"
+                  key={user._id}
+                  onClick={() => {
+                    if (
+                      selectedUsers.some(
+                        (userDate) => userDate._id === user._id
+                      )
+                    ) {
+                      return;
+                    }
+
+                    if (isUpdate) {
+                      setClickUserID(user._id);
+                      addGroupUser(user._id);
+                    }
+
+                    return setSelectedUsers((state) => {
+                      return [...state, user];
+                    });
+                  }}
+                >
+                  <div className="groupChatModal__user-image-container">
+                    <img
+                      className="groupChatModal__user-image"
+                      alt="user-icon"
+                      src={image}
+                    />
+                  </div>
+                  <div className="groupChatModal__user-data-container">
+                    <div className="groupChatModal__user-data">
+                      <span className="groupChatModal__user-data-type">
+                        Name:{" "}
+                      </span>
+                      {user.name}
+                    </div>
+                    <div className="groupChatModal__user-data">
+                      <span className="groupChatModal__user-data-type">
+                        Email:{" "}
+                      </span>
+                      {user.email}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default GroupChatModal;
+import React from "react";
+
+function InputImage({ pictureInput, setPopup, setInputImage }) {
+  function isImage(file) {
+    const type = file.type.split("/", 1)[0];
+    if (type === "image") {
+      return true;
+    }
+
+    setPopup((state) => ({
+      ...state,
+      text: "file must be an image",
+      isVisible: true,
+    }));
+
+    return false;
+  }
+
+  return (
+    <input
+      ref={pictureInput}
+      className="login__input"
+      id="picture"
+      name="picture"
+      placeholder="picture"
+      type="file"
+      onChange={(e) => {
+        if (isImage(e.target.files[0])) {
+          setInputImage((state) => ({
+            ...state,
+            pictureFile: e.target.files[0],
+            pictureLinkFile: URL.createObjectURL(e.target.files[0]),
+          }));
+        } else {
+          const defaultText = new File(["Файл не выбран"], "Файл не выбран");
+          const dataTransfer = new DataTransfer();
+          dataTransfer.items.add(defaultText);
+          pictureInput.current.files = dataTransfer.files;
+        }
+      }}
+    />
+  );
+}
+
+export default InputImage;
+.loader-container {
+  width: 100vw;
+  min-height: 100vh;
+  background-color: rgba(128, 128, 128, 0.432);
+  position: absolute;
+  top: 0;
+  left: 0;
+  --size: 120;
+  --coefficient: 1px;
+  --timeline: 2.6s;
+  --delay: 0.65s;
+  --rotation-y: -24;
+  --rotation-x: 28;
+  --color-one: #3a0ca3;
+  --color-two: #4361ee;
+  --color-three: #4cc9f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  font-family: "Google Sans", sans-serif, system-ui;
+}
+
+*,
+.loader-container:after,
+.loader-container:before {
+  box-sizing: border-box;
+  transform-style: preserve-3d;
+}
+
+.scene {
+  position: relative;
+  transform: translate3d(0, 0, 100vmin)
+    rotateX(calc(var(--rotation-y, 0) * 1deg))
+    rotateY(calc(var(--rotation-x, 0) * 1deg)) rotateX(0deg);
+}
+
+.loader {
+  transform-origin: 50% 50%;
+  animation: scale var(--timeline) var(--delay) infinite linear;
+}
+
+@keyframes scale {
+  0%,
+  10% {
+    transform: scaleX(1) scaleY(1);
+  }
+  35%,
+  100% {
+    transform: scaleX(0.5) scaleY(0.5);
+  }
+}
+
+.shadow {
+  width: calc(var(--size) * var(--coefficient));
+  position: absolute;
+  bottom: 0;
+  aspect-ratio: 1;
+  transform-origin: 50% 50%;
+  background: hsl(210 80% 50% / 0.2);
+  transform: rotateX(90deg)
+    translate3d(0, 0, calc((var(--size) * (var(--coefficient) * -0.5)) - 1px))
+    scale(0.96);
+  animation: squish-squosh var(--timeline) var(--delay) infinite,
+    fade var(--timeline) var(--delay) infinite;
+  background: black;
+}
+
+.loader {
+  --depth: var(--size);
+  --color: var(--color-one, #8338ec);
+  width: calc(var(--depth) * var(--coefficient));
+  aspect-ratio: 1;
+  transform-origin: 50% 50%;
+  animation: squish-squosh var(--timeline) var(--delay) infinite;
+}
+
+.spinner {
+  animation: spin var(--timeline) var(--delay) infinite;
+}
+
+.jumper {
+  animation: jump var(--timeline) var(--delay) infinite;
+}
+
+@keyframes squish-squosh {
+  0%,
+  50%,
+  60% {
+    scale: 1 1 1;
+  }
+  10%,
+  35% {
+    scale: 1.2 0.8 1.2;
+  }
+  25% {
+    scale: 0.8 1.2 0.8;
+  }
+  70% {
+    scale: 1 1 2;
+  }
+  80% {
+    scale: 2 1 2;
+  }
+  90%,
+  100% {
+    scale: 2 2 2;
+  }
+}
+
+@keyframes fade {
+  0%,
+  10%,
+  40%,
+  50%,
+  60%,
+  100% {
+    opacity: 1;
+  }
+  25% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes spin {
+  0%,
+  10% {
+    rotate: 0deg;
+  }
+  30%,
+  100% {
+    rotate: -360deg;
+  }
+}
+@keyframes jump {
+  0%,
+  10%,
+  35%,
+  50% {
+    translate: 0 0;
+  }
+  25% {
+    translate: 0 -150%;
+  }
+}
+
+.cuboid {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+.cuboid__side {
+  background: var(--color);
+  position: absolute;
+}
+.cuboid__side:nth-of-type(1) {
+  --b: 1.1;
+  height: calc(var(--depth, 20) * var(--coefficient));
+  width: 100%;
+  top: 0;
+  transform: translate(0, -50%) rotateX(90deg);
+}
+.cuboid__side:nth-of-type(2) {
+  --b: 0.9;
+  --color: var(--color-three, #ff006e);
+  height: 100%;
+  width: calc(var(--depth, 20) * var(--coefficient));
+  top: 50%;
+  right: 0;
+  transform: translate(50%, -50%) rotateY(90deg);
+}
+.cuboid__side:nth-of-type(3) {
+  --b: 1;
+  width: 100%;
+  height: calc(var(--depth, 20) * var(--coefficient));
+  bottom: 0;
+  transform: translate(0%, 50%) rotateX(90deg);
+}
+.cuboid__side:nth-of-type(4) {
+  --b: 1;
+  --color: var(--color-three, #ff006e);
+  height: 100%;
+  width: calc(var(--depth, 20) * var(--coefficient));
+  left: 0;
+  top: 50%;
+  transform: translate(-50%, -50%) rotateY(90deg);
+}
+.cuboid__side:nth-of-type(5) {
+  --b: 1;
+  --color: var(--color-two, #3a86ef);
+  height: 100%;
+  width: 100%;
+  transform: translate3d(
+    0,
+    0,
+    calc(var(--depth, 20) * (var(--coefficient) * 0.5))
+  );
+  top: 0;
+  left: 0;
+}
+.cuboid__side:nth-of-type(6) {
+  --b: 1.2;
+  height: 100%;
+  width: 100%;
+  transform: translate3d(
+      0,
+      0,
+      calc(var(--depth, 20) * (var(--coefficient) * -0.5))
+    )
+    rotateY(180deg);
+  top: 0;
+  left: 0;
+}
+import React from "react";
+import "./loader.css";
+
+function Loader() {
+  return (
+    <div className="loader-container">
+      <div class="scene">
+        <div class="shadow"></div>
+        <div class="jumper">
+          <div class="spinner">
+            <div class="scaler">
+              <div class="loader">
+                <div class="cuboid">
+                  <div class="cuboid__side"></div>
+                  <div class="cuboid__side"></div>
+                  <div class="cuboid__side"></div>
+                  <div class="cuboid__side"></div>
+                  <div class="cuboid__side"></div>
+                  <div class="cuboid__side"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Loader;
+.login {
+  display: flex;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  flex-direction: column;
+}
+
+.login__conrainer {
+  width: 600px;
+  background-color: rgb(255, 255, 255);
+  border-radius: 1rem;
+  padding: 30px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  margin-top: 10px;
+}
+
+.login__title-container {
+  margin-top: calc(100vh - 85vh);
+  min-height: 100px;
+  width: 600px;
+  background-color: rgb(255, 255, 255);
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-family: "Raleway", sans-serif;
+  background-color: pink;
+}
+
+.login__types-btns {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  width: 100%;
+}
+
+.login__types-btn {
+  width: 50%;
+  padding: 9px 5px 9px;
+  border-radius: 1rem;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s linear;
+}
+
+.login__types-btn:hover {
+  background-color: gray;
+}
+
+.login__types-btn_active {
+  background-color: rgb(54, 204, 204);
+}
+
+.lable__inpun-container {
+  width: 100%;
+  padding: 20px;
+}
+
+.login__label {
+  width: 100%;
+}
+
+.login__input-password {
+  width: 100%;
+  position: relative;
+}
+
+.logit__show-password {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 10px;
+  border: none;
+  padding: 4px;
+  background-color: rgb(169, 228, 255);
+  border-radius: 0.3rem;
+  cursor: pointer;
+  width: 50px;
+}
+
+.login__input {
+  width: 100%;
+  margin: 10px 0 10px;
+  padding: 6px;
+}
+
+.login__input_error {
+  outline-color: #ff0000;
+  border-color: #ff0000;
+  box-shadow: none;
+}
+
+.login__error {
+  color: #9b0000;
+  padding: 10px;
+  border-radius: 5px;
+  transition: opacity 0.3s ease-in-out;
+  width: 100%;
+  font-size: 15px;
+}
+
+.login__picture-input {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  min-height: 100px;
+}
+
+.ligin__picture-container {
+  border-radius: 10rem;
+  border: 1px dotted gray;
+  min-width: 100px;
+  min-height: 100px;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.login__login-bts {
+  width: 100%;
+  margin-top: 30px;
+  background-color: rgb(0, 143, 226);
+  padding: 8px;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  color: white;
+}
+
+.login__login-bts_disabled {
+  background-color: gray;
+}
+
+.login__login-bts:active {
+  background-color: gray;
+}
+
+.login__title {
+  color: rgba(225, 225, 225, 0.01);
+  background-image: url("https://images.unsplash.com/photo-1499195333224-3ce974eecb47?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=2cf549433129d4227d1879347b9e78ce&auto=format&fit=crop&w=1248&q=80");
+  background-repeat: repeat;
+  -webkit-background-clip: text;
+  animation: animate 15s ease-in-out infinite;
+  text-align: center;
+  text-transform: uppercase;
+  font-weight: 900;
+  font-size: 70px;
+}
+
+@keyframes animate {
+  0%,
+  100% {
+    background-position: left top;
+  }
+  25% {
+    background-position: right bottom;
+  }
+  50% {
+    background-position: left bottom;
+  }
+  75% {
+    background-position: right top;
+  }
+}
+
+.login__loader {
+  width: 20px;
+  height: 20px;
+  border-bottom-color: transparent;
+}
+import React, { useEffect, useRef, useState } from "react";
+import "./loginSingUp.css";
+import { auth, singUp } from "../../api/api";
+import { useNavigate } from "react-router-dom";
+import { sendUserData } from "./sendUserDate";
+import { validationInput } from "./validationInput";
+import { UserState } from "../../context/userProvider";
+import InputImage from "../InputImage/InputImage";
+import ButtonLoader from "../ButtonLoader/ButtonLoader";
+
+function LoginSingUp({ setPopup }) {
+  const navigate = useNavigate();
+
+  const { setUser } = UserState();
+
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [registrationType, setRegistrationType] = useState(false);
+  const [isLoaderButton, setIsLoaderButto] = useState(false);
+  const [disabledButton, setDisabledButton] = useState(true);
+
+  const [userData, setUserData] = useState({
+    name: {
+      value: "",
+      error: "",
+    },
+    email: {
+      value: "",
+      error: "",
+    },
+    password: {
+      value: "",
+      error: "",
+    },
+    confirmPassword: {
+      value: "",
+      error: "",
+    },
+  });
+
+  const [inputImage, setInputImage] = useState({
+    pictureFile: "",
+    pictureLinkFile: "",
+  });
+
+  const pictureVisibleContainer = useRef(null);
+  const pictureInput = useRef(null);
+
+  const loginContainer = useRef(null);
+
+  useEffect(() => {
+    if (!!inputImage.pictureLinkFile && registrationType) {
+      pictureVisibleContainer.current.style.backgroundImage = `url(${inputImage.pictureLinkFile})`;
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(inputImage.pictureFile);
+      pictureInput.current.files = dataTransfer.files;
+    }
+  }, [inputImage.pictureLinkFile, registrationType]);
+
+  useEffect(() => {
+    const errors = !registrationType
+      ? !!userData.email.error || !!userData.password.error
+      : !!userData.name.error ||
+        !!userData.email.error ||
+        !!userData.password.error ||
+        !!userData.confirmPassword.error;
+
+    const textError = !registrationType
+      ? !!!userData.email.value || !!!userData.password.value
+      : !!!userData.name.value ||
+        !!!userData.email.value ||
+        !!!userData.password.value ||
+        !!!userData.confirmPassword.value;
+
+    if (errors || textError) {
+      return setDisabledButton(true);
+    } else {
+      return setDisabledButton(false);
+    }
+  }, [userData, registrationType]);
+
+  return (
+    <div className="login">
+      <div className="login__title-container">
+        <p className="login__title">GaySSenger</p>
+      </div>
+      <div className="login__conrainer" ref={loginContainer}>
+        <div className="login__types-btns">
+          <button
+            className={`login__types-btn ${
+              !registrationType && "login__types-btn_active"
+            }`}
+            onClick={() => setRegistrationType(false)}
+          >
+            Login
+          </button>
+          <button
+            className={`login__types-btn ${
+              registrationType && "login__types-btn_active"
+            }`}
+            onClick={() => setRegistrationType(true)}
+          >
+            Sing Up
+          </button>
+        </div>
+        <div className="lable__inpun-container">
+          {registrationType && (
+            <>
+              <label className="login__label" htmlFor="Name">
+                Name
+              </label>
+              <input
+                required
+                className={`login__input ${
+                  !!userData.name.error && "login__input_error"
+                }`}
+                id="name"
+                name="name"
+                placeholder="Enter Your Name"
+                type="name"
+                value={userData.name.value}
+                onChange={(e) => validationInput(e, setUserData)}
+              />
+            </>
+          )}
+          <label className="login__label" htmlFor="Email">
+            Email
+          </label>
+          <input
+            min={2}
+            required
+            className={`login__input ${
+              !!userData.email.error && "login__input_error"
+            }`}
+            id="email"
+            name="email"
+            placeholder="Enter Email"
+            type="text"
+            value={userData.email.value}
+            onChange={(e) => validationInput(e, setUserData)}
+          />
+
+          <label className="login__label" htmlFor="Password">
+            Password
+          </label>
+          <div className="login__input-password">
+            <input
+              min={2}
+              required
+              className={`login__input ${
+                !!userData.password.error && "login__input_error"
+              }`}
+              id="password"
+              name="password"
+              placeholder="password"
+              type={`${passwordVisible ? "text" : "password"}`}
+              value={userData.password.value}
+              onChange={(e) => validationInput(e, setUserData)}
+            />
+            <button
+              className="logit__show-password"
+              onClick={() =>
+                setPasswordVisible((state) => {
+                  if (state) {
+                    return false;
+                  }
+                  return true;
+                })
+              }
+            >
+              {`${passwordVisible ? "hide" : "show"}`}
+            </button>
+          </div>
+
+          {registrationType && (
+            <>
+              <label className="login__label" htmlFor="Confirm Password">
+                Confirm Password
+              </label>
+              <div className="login__input-password">
+                <input
+                  min={2}
+                  required
+                  className={`login__input ${
+                    !!userData.confirmPassword.error && "login__input_error"
+                  }`}
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  placeholder="Confirm Password"
+                  type={`${passwordVisible ? "text" : "password"}`}
+                  value={userData.confirmPassword.value}
+                  onChange={(e) => validationInput(e, setUserData)}
+                />
+                <button
+                  className="logit__show-password"
+                  onClick={() =>
+                    setPasswordVisible((state) => {
+                      if (state) {
+                        return false;
+                      }
+                      return true;
+                    })
+                  }
+                >
+                  {`${passwordVisible ? "hide" : "show"}`}
+                </button>
+              </div>
+              <label className="login__label" htmlFor="Confirm Password">
+                Upload your picture
+              </label>
+              <div className="login__picture-input">
+                <InputImage
+                  pictureInput={pictureInput}
+                  setPopup={setPopup}
+                  setInputImage={setInputImage}
+                />
+                {!!inputImage.pictureFile && (
+                  <div
+                    className="ligin__picture-container"
+                    ref={pictureVisibleContainer}
+                  ></div>
+                )}
+              </div>
+            </>
+          )}
+          <button
+            className={`login__login-bts ${
+              disabledButton && "login__login-bts_disabled"
+            }`}
+            disabled={isLoaderButton || disabledButton}
+            onClick={() =>
+              sendUserData(
+                registrationType,
+                userData,
+                setPopup,
+                setIsLoaderButto,
+                singUp,
+                navigate,
+                auth,
+                setUser
+              )
+            }
+          >
+            {isLoaderButton ? (
+              <ButtonLoader addClass={"login__loader"} />
+            ) : (
+              `${registrationType ? "Sing Up" : "Login"}`
+            )}
+          </button>
+        </div>
+        <span className="login__error">
+          {(!registrationType
+            ? userData.email.error || userData.password.error
+            : Object.values(userData).find((input) => !!input.error)?.error) ||
+            (disabledButton && "Все поля должны быть заполнены")}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+export default LoginSingUp;
+import { resSetUser } from "../../utils/resSetUser";
+
+export function sendUserData(
+  registrationType,
+  userData,
+  setPopup,
+  setIsLoaderButto,
+  singUp,
+  navigate,
+  auth,
+  setUser
+) {
+  const name = userData.name.value;
+  const email = userData.email.value;
+  const password = userData.password.value;
+  const confirmPassword = userData.confirmPassword.value;
+  const pictureFile = userData.pictureFile;
+
+  if (registrationType) {
+    if (!name || !email || !password || !confirmPassword) {
+      setPopup((state) => ({
+        ...state,
+        text: "left empty field",
+        isVisible: true,
+      }));
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setPopup((state) => ({
+        ...state,
+        text: "password mismatch",
+        isVisible: true,
+      }));
+      return;
+    }
+
+    setIsLoaderButto(true);
+    singUp(name, email, password, pictureFile)
+      .then((res) => {
+        resSetUser(res, navigate, setUser);
+      })
+
+      .catch((e) => {
+        setPopup((state) => ({
+          ...state,
+          text: e.message,
+          isVisible: true,
+        }));
+        console.log(e);
+      })
+      .finally(() => {
+        setIsLoaderButto(false);
+      });
+  } else {
+    if (!email || !password) {
+      setPopup((state) => ({
+        ...state,
+        text: "left empty field",
+        isVisible: true,
+      }));
+      return;
+    }
+
+    setIsLoaderButto(true);
+    auth(email, password)
+      .then((res) => {
+        resSetUser(res, navigate, setUser);
+      })
+      .catch((e) => {
+        console.log(e);
+        setPopup((state) => ({
+          ...state,
+          text: e.message,
+          isVisible: true,
+        }));
+      })
+      .finally(() => {
+        setIsLoaderButto(false);
+      });
+  }
+}
+export function validationInput(e, setUserData) {
+  const value = e.target.value;
+  switch (e.target.name) {
+    case "name":
+      setUserData((state) => ({
+        ...state,
+        [e.target.name]: {
+          ...state[e.target.name],
+          value: value,
+          error: /^[\p{L}\p{N}_-]{2,10}$/u.test(value)
+            ? ""
+            : "Имя пользователя может содержать только буквы латинского алфавита, цифры, дефис и знак подчеркивания и должно быть не менее 2 и не более 10 символов",
+        },
+      }));
+      break;
+
+    case "email":
+      setUserData((state) => ({
+        ...state,
+        [e.target.name]: {
+          ...state[e.target.name],
+          value: value,
+          error: /\S+@\S+\.\S+/.test(value)
+            ? ""
+            : "Неверный адрес электронной почты",
+        },
+      }));
+      break;
+
+    case "password":
+      setUserData((state) => ({
+        ...state,
+        [e.target.name]: {
+          ...state[e.target.name],
+          value: value,
+          error: /^[a-zA-Z0-9]{4,30}$/u.test(value)
+            ? ""
+            : "Пароль может содержать только буквы латинского алфавита, цифры, дефис и знак подчеркивания и должно быть не менее 4 и не более 30 символов",
+        },
+        confirmPassword: {
+          ...state.confirmPassword,
+          error:
+            state.confirmPassword.value === value
+              ? ""
+              : "Пароли должны совпадать",
+        },
+      }));
+      break;
+    case "confirmPassword":
+      setUserData((state) => ({
+        ...state,
+        [e.target.name]: {
+          ...state[e.target.name],
+          value: value,
+          error:
+            state.password.value === value ? "" : "Пароли должны совпадать",
+        },
+      }));
+      break;
+    default:
+      break;
+  }
+}
+.myChats {
+  height: 100%;
+  background-color: white;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 5px;
+  position: relative;
+}
+
+.myChats__header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding-top: 10px;
+  justify-content: space-evenly;
+  font-size: 20px;
+  white-space: nowrap;
+}
+
+.myChats__new-group-chat {
+  display: flex;
+  align-items: center;
+  padding: 0 5px 0;
+  margin: 0 0 0 10px;
+  border-radius: 1rem;
+  border: none;
+  background-color: rgb(212, 212, 212);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.myChats__new-group-chat-plus {
+  font-size: 30px;
+  margin-left: 5px;
+}
+
+.myChats__chats-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 94%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding-bottom: 7px;
+}
+
+.myChats__chats {
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 0 5px 0 5px;
+  position: relative;
+}
+
+.myChats__chat-unread {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  background-color: rgb(194, 0, 81);
+  color: white;
+  border-radius: 10rem;
+  padding: 0 5px;
+  z-index: 1;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 20%;
+}
+
+.myChats__chat {
+  margin-top: 10px;
+  background-color: rgb(219, 219, 219);
+  width: 100%;
+  border-radius: 0.5rem;
+  box-sizing: border-box;
+  padding: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  cursor: pointer;
+}
+
+.myChats__chat_selected {
+  background-color: rgb(21, 201, 201);
+}
+
+.myChats__chat-info {
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.myChats__chat-info-message {
+  display: flex;
+  flex-direction: column;
+  margin-left: 7px;
+  max-width: 75%;
+}
+
+.myChats__chat-lastedMessage {
+  max-width: 100%;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.myChats__chat-lastedMessage-name {
+  font-weight: bold;
+  font-size: 1.05rem;
+  color: rgb(124, 124, 124);
+}
+
+.myChats__chat-name {
+  max-width: 100%;
+  font-size: 18px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.myChats__image-container {
+  min-width: 40px;
+  min-height: 40px;
+  position: relative;
+  border-radius: 10rem;
+  overflow: hidden;
+}
+
+.myChats__chat-avatar {
+  height: 100%;
+  top: 0;
+  position: absolute;
+  right: 50%;
+  transform: translateX(50%);
+}
+
+.myChats__image-container_group {
+  border-radius: 0;
+}
+import React from "react";
+import "./myChats.css";
+import { ChatState } from "../../context/chatProvider";
+import { chatData } from "../../utils/chatData";
+
+function MyChats({ chats, user, setIsGroupChatModal }) {
+  const { selectedChat, setSelectedChat, unreadMessages } = ChatState();
+
+  return (
+    <div className="myChats" onClick={() => setSelectedChat(null)}>
+      <div className="myChats__header">
+        My Chats
+        <button
+          className="myChats__new-group-chat"
+          onClick={() => setIsGroupChatModal(true)}
+        >
+          New Group Chat
+          <span className="myChats__new-group-chat-plus">+</span>
+        </button>
+      </div>
+
+      <div className="myChats__chats-container">
+        <div className="myChats__chats">
+          {chats.length > 0 &&
+            chats.map((chat) => {
+              const { image, opponent } = chatData(chat, user);
+              return (
+                <div
+                  key={chat._id}
+                  onClick={(e) => {
+                    setSelectedChat(chat);
+                    e.stopPropagation();
+                  }}
+                  className={`myChats__chat ${
+                    selectedChat?._id === chat._id && "myChats__chat_selected"
+                  }`}
+                >
+                  {!!unreadMessages[chat._id] && (
+                    <div className="myChats__chat-unread">
+                      {unreadMessages[chat._id]}
+                    </div>
+                  )}
+                  <div className="myChats__chat-info">
+                    <div
+                      className={`myChats__image-container ${
+                        chat.isGroupChat && "myChats__image-container_group"
+                      }`}
+                    >
+                      <img
+                        src={image}
+                        alt="chat-avatar"
+                        className="myChats__chat-avatar"
+                      />
+                    </div>
+                    <div className="myChats__chat-info-message">
+                      <div className="myChats__chat-name">
+                        {chat.isGroupChat ? chat.chatName : opponent.name}
+                      </div>
+                      {chat.lastedMessage && selectedChat?._id !== chat._id && (
+                        <div className="myChats__chat-lastedMessage">
+                          <span className="myChats__chat-lastedMessage-name">
+                            {chat.lastedMessage?.sender.name}:
+                          </span>{" "}
+                          {chat.lastedMessage?.content}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default MyChats;
+import { useState, useEffect, useRef } from "react";
+
+export default function useComponentVisible(initialIsVisible) {
+  const [isComponentVisible, setIsComponentVisible] =
+    useState(initialIsVisible);
+  const ref = useRef(null);
+
+  const handleClickOutside = (event) => {
+    if (ref.current && !ref.current.contains(event.target)) {
+      return setIsComponentVisible(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("click", handleClickOutside, true);
+    return () => {
+      document.removeEventListener("click", handleClickOutside, true);
+    };
+  }, []);
+
+  return [ref, isComponentVisible, setIsComponentVisible];
+}
+.popup {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translate(-50%, -150%);
+  min-width: 20%;
+  min-height: 100px;
+  background-color: rgba(0, 230, 153, 0.877);
+  border-radius: 1rem;
+  transition: all 0.2s linear;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 25px;
+  box-sizing: border-box;
+  padding: 0 10px 0;
+}
+
+.popup_visible {
+  transform: translate(-50%, 0);
+}
+
+.popup__text {
+  white-space: nowrap;
+}
+
+.popup__close {
+  position: absolute;
+  right: 0;
+  top: 0;
+  border-radius: 1rem;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+}
+import React, { useEffect } from "react";
+import "./popup.css";
+
+function Popup({ popup, setPopup }) {
+  useEffect(() => {
+    if (popup.isVisible) {
+      const timer = setTimeout(() => {
+        setPopup((state) => ({ ...state, isVisible: false }));
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [popup.isVisible]);
+
+  return (
+    <div className={`popup ${popup.isVisible && "popup_visible"}`}>
+      <p className="popup__text">{popup.text}</p>
+      <button
+        className="popup__close"
+        onClick={() => setPopup((state) => ({ ...state, isVisible: false }))}
+      >
+        Х
+      </button>
+    </div>
+  );
+}
+
+export default Popup;
+.profile {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.39);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile__edit-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  cursor: pointer;
+  width: 100%;
+  height: 40px;
+}
+
+.profile__edit-info-icon {
+  width: 20px;
+}
+
+.profile__info-input {
+  padding: 2px;
+}
+
+.profile__input-image {
+  display: none;
+}
+
+.profile_info {
+  background-color: white;
+  width: 300px;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 10px;
+  position: relative;
+  white-space: nowrap;
+}
+
+.profile__avatar-container {
+  cursor: pointer;
+  width: 200px;
+  height: 200px;
+  border: 1px dotted gray;
+  border-radius: 10rem;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile__user-avatar {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  position: absolute;
+  height: 100%;
+}
+
+.profile__edit-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  background-color: rgba(128, 128, 128, 0.397);
+  opacity: 0;
+  transition: opacity 0.3s linear;
+}
+
+.profile__avatar-container:hover .profile__edit-container {
+  opacity: 1;
+}
+
+.profile__edit-icon {
+  width: 70px;
+}
+
+.profile__info {
+  font-size: 20px;
+}
+
+.profile__close {
+  position: absolute;
+  top: -25px;
+  right: -25px;
+  width: 30px;
+  height: 30px;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.profile__loader {
+  width: 20px;
+  height: 20px;
+  border: 3px solid #000000;
+  border-bottom-color: transparent;
+}
+
+.profile__loader-avatar {
+  width: 90%;
+  height: 90%;
+  border: 3px solid #000000;
+  position: absolute;
+  z-index: 2;
+  border-bottom-color: transparent;
+}
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import "./profile.css";
+import editIcon from "../../images/edit.png";
+import InputImage from "../InputImage/InputImage";
+import { unpateUserDate, updateUserAvatar } from "../../api/api";
+import { resSetUser } from "../../utils/resSetUser";
+import { useNavigate } from "react-router-dom";
+import { UserState } from "../../context/userProvider";
+import ButtonLoader from "../ButtonLoader/ButtonLoader";
+import defaultUser from "../../images/user.png";
+import { createImageBuffer } from "../../utils/createImadeBuffer";
+
+function Profile({ user, user: { email, name }, setIsProfileOpen, setPopup }) {
+  const navigate = useNavigate();
+  const { setUser } = UserState();
+
+  const [editName, setEditName] = useState(false);
+  const [editEmail, setEditEmail] = useState(false);
+  const [inputName, setInputName] = useState(name);
+  const [inputEmail, setInputEmail] = useState(email);
+
+  const [isLoaderButton, setIsLoaderButto] = useState(false);
+
+  const pictureInput = useRef(null);
+  const [inputImage, setInputImage] = useState({
+    pictureFile: "",
+    pictureLinkFile: "",
+  });
+
+  const userAvatar = useMemo(() => {
+    return !!user.image?.data
+      ? createImageBuffer(user.image.data.data, user.image.contentType)
+      : defaultUser;
+  }, [user]);
+
+  useEffect(() => {
+    if (!!inputImage.pictureFile) {
+      setIsLoaderButto(true);
+      updateUserAvatar(inputImage.pictureFile)
+        .then((res) => {
+          resSetUser(res, navigate, setUser);
+        })
+        .catch((e) => {
+          setPopup((state) => ({
+            ...state,
+            text: e.message,
+            isVisible: true,
+          }));
+          console.log(e);
+        })
+        .finally(() => {
+          setIsLoaderButto(false);
+          setInputImage((state) => ({ ...state, pictureFile: "" }));
+        });
+    }
+  }, [inputImage.pictureFile]);
+
+  function closeProfile() {
+    sendUserUpdate();
+    setIsProfileOpen(false);
+  }
+
+  function sendUserUpdate() {
+    if (inputName !== name || inputEmail !== email) {
+      setIsLoaderButto(true);
+      unpateUserDate(inputName, inputEmail)
+        .then((res) => {
+          resSetUser(res, navigate, setUser);
+        })
+        .catch((e) => {
+          setPopup((state) => ({
+            ...state,
+            text: e.message,
+            isVisible: true,
+          }));
+          console.log(e);
+        })
+        .finally(() => {
+          setIsLoaderButto(false);
+        });
+    }
+  }
+
+  return (
+    <div className="profile" onClick={closeProfile}>
+      <div className="profile_info" onClick={(e) => e.stopPropagation()}>
+        <button className="profile__close" onClick={closeProfile}>
+          X
+        </button>
+        <div
+          className="profile__edit-info"
+          onClick={() =>
+            !isLoaderButton &&
+            setEditName((state) => {
+              state && sendUserUpdate();
+              return !state;
+            })
+          }
+        >
+          {!editName && <p className="profile__info"> {name}</p>}
+          {editName && (
+            <input
+              onClick={(e) => e.stopPropagation()}
+              type="text"
+              placeholder="name"
+              className="profile__info-input"
+              value={inputName}
+              onChange={(e) => setInputName(e.target.value)}
+            />
+          )}
+          {isLoaderButton ? (
+            <ButtonLoader addClass={"profile__loader"} />
+          ) : (
+            <img
+              src={editIcon}
+              alt="edit-icon"
+              className="profile__edit-info-icon"
+            />
+          )}
+        </div>
+        <div
+          className="profile__avatar-container"
+          onClick={() => {
+            pictureInput.current.click();
+          }}
+        >
+          <div className="profile__edit-container">
+            <img
+              src={editIcon}
+              alt="edit-icon"
+              className="profile__edit-icon"
+            />
+          </div>
+          {isLoaderButton ? (
+            <ButtonLoader addClass={"profile__loader-avatar"} />
+          ) : (
+            <img
+              src={userAvatar}
+              alt="user-avatar"
+              className="profile__user-avatar"
+            />
+          )}
+
+          <div className="profile__input-image">
+            <InputImage
+              pictureInput={pictureInput}
+              setPopup={setPopup}
+              setInputImage={setInputImage}
+            />
+          </div>
+        </div>
+        <div
+          className="profile__edit-info"
+          onClick={() =>
+            !isLoaderButton &&
+            setEditEmail((state) => {
+              state && sendUserUpdate();
+              return !state;
+            })
+          }
+        >
+          {!editEmail && <p className="profile__info"> {email}</p>}
+          {editEmail && (
+            <input
+              onClick={(e) => e.stopPropagation()}
+              type="text"
+              placeholder="name"
+              className="profile__info-input"
+              value={inputEmail}
+              onChange={(e) => setInputEmail(e.target.value)}
+            />
+          )}
+          {isLoaderButton ? (
+            <ButtonLoader addClass={"profile__loader"} />
+          ) : (
+            <img
+              src={editIcon}
+              alt="edit-icon"
+              className="profile__edit-info-icon"
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Profile;
+import React, { useEffect, useRef, useState } from "react";
+import { allUsers } from "../../api/api";
+import ButtonLoader from "../ButtonLoader/ButtonLoader";
+import searchIcon from "../../images/search.png";
+
+import "./searchUsersInput.css";
+
+function SearchUsersInput({
+  isOpenSerch,
+  setSearchUsers,
+  inputSearch,
+  setInputSearch,
+}) {
+  const [isLoadingSearch, setIsLoadingSearch] = useState(false);
+  const timer = useRef(null);
+
+  useEffect(() => {
+    if (inputSearch) {
+      if (!isLoadingSearch) setIsLoadingSearch(true);
+      if (timer.current) {
+        clearTimeout(timer.current);
+      }
+
+      timer.current = setTimeout(() => {
+        allUsers(inputSearch)
+          .then((res) => {
+            setSearchUsers(res.data);
+          })
+          .catch((e) => console.log(e))
+          .finally(() => setIsLoadingSearch(false));
+      }, 1000);
+    }
+  }, [inputSearch]);
+
+  useEffect(() => {
+    setInputSearch("");
+    setSearchUsers([]);
+  }, [isOpenSerch]);
+
+  return (
+    <div className="searchUsersInput__input-container">
+      <input
+        type="text"
+        className="searchUsersInput__input"
+        placeholder="User name or Email"
+        value={inputSearch}
+        onChange={(e) => setInputSearch(e.target.value)}
+      />
+      {isLoadingSearch ? (
+        <ButtonLoader addClass={"searchUsersInput__loader"} />
+      ) : (
+        <img
+          className="searchUsersInput__search-icon"
+          alt="search-icon"
+          src={searchIcon}
+        />
+      )}
+    </div>
+  );
+}
+
+export default SearchUsersInput;
+.searchUsersInput__input-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.searchUsersInput__input {
+  width: 90%;
+  font-size: 15px;
+  outline: none;
+  border: none;
+  border-bottom: 2px solid black;
+  padding-bottom: 4px;
+
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
+                                supported by Chrome, Edge, Opera and Firefox */
+}
+
+.searchUsersInput__search-icon {
+  height: 30px;
+}
+
+.searchUsersInput__input:focus {
+  border-bottom: 2px solid blue;
+}
+
+.searchUsersInput__loader {
+  width: 30px;
+  height: 30px;
+  border: 3px solid #000000;
+  border-bottom-color: transparent;
+}
+.searchUser {
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  height: 100vh;
+  position: absolute;
+  transform: translateX(-100%);
+  box-sizing: border-box;
+  padding: 6px;
+  background-color: rgba(53, 53, 53, 0.315);
+  transition: transform 0.1s linear;
+  z-index: 2;
+}
+
+.searchUser__container {
+  background-color: white;
+  box-sizing: border-box;
+  padding: 10px;
+  width: 20vw;
+  min-width: 400px;
+  height: 100%;
+  border-radius: 0.5rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateX(-100%);
+  transition: transform 0.3s linear;
+}
+
+.searchUser__close {
+  position: absolute;
+  padding: 6px 9px;
+  border-radius: 1rem;
+  right: 2px;
+  top: 2px;
+  background-color: rgb(199, 199, 199);
+  z-index: 2;
+}
+
+.searchUser__title {
+  font-size: 25px;
+  width: 100%;
+  align-items: end;
+  padding-bottom: 15px;
+  border-bottom: 3px solid rgba(128, 128, 128, 0.685);
+}
+
+.searchUser__input-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.searchUser__input {
+  width: 90%;
+  font-size: 15px;
+  outline: none;
+  border: none;
+  border-bottom: 2px solid black;
+  padding-bottom: 4px;
+}
+
+.searchUser__search-icon {
+  height: 30px;
+}
+
+.searchUser__input:focus {
+  border-bottom: 2px solid blue;
+}
+
+.searchUser_open {
+  transform: translateX(0);
+}
+
+.searchUser__container_open {
+  transform: translateX(0);
+  transition: transform 0.3s linear;
+}
+
+.searchUser__loader {
+  width: 30px;
+  height: 30px;
+  border: 3px solid #000000;
+  border-bottom-color: transparent;
+}
+
+.searchUser__user {
+  display: flex;
+  align-items: center;
+  background-color: rgb(21, 201, 201);
+  margin-top: 10px;
+  border-radius: 1rem;
+  box-sizing: border-box;
+  padding: 10px;
+  width: 100%;
+  cursor: pointer;
+}
+
+.searchUser__user-image-container {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: 10rem;
+  border: 1px dotted gray;
+  overflow: hidden;
+  margin-right: 20px;
+}
+
+.searchUser__user-image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 100%;
+}
+
+.searchUser__user-data {
+  font-size: 20px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.searchUser__user-data:first-child {
+  margin-bottom: 10px;
+}
+
+.searchUser__user-data-type {
+  font-weight: bold;
+}
+import React, { useEffect, useRef, useState } from "react";
+import "./searchUsers.css";
+
+import { accessChat, allUsers } from "../../api/api";
+import { createImageBuffer } from "../../utils/createImadeBuffer";
+import baseImageUser from "../../images/user.png";
+import { ChatState } from "../../context/chatProvider";
+import SearchUsersInput from "../SearchUserInput/SearchUserInput";
+import { UserState } from "../../context/userProvider";
+import { SocketState } from "../../context/socketProvider";
+
+function SearchUsers({ isOpenSerch, setIsOpenSearch }) {
+  const [inputSearch, setInputSearch] = useState("");
+  const [searchUses, setSearchUsers] = useState([]);
+  const { setSelectedChat } = ChatState();
+  const { chats, setChats } = ChatState();
+  const { user } = UserState();
+  const { socket } = SocketState();
+
+  function createChat(userId) {
+    accessChat(userId)
+      .then((res) => {
+        setChats((state) => [res.data, ...state]);
+        socket.emit("addUserChat", { userId, chatId: res.data._id });
+        setSelectedChat(res.data);
+      })
+      .finally(() => setIsOpenSearch(false))
+      .catch((e) => console.log(e));
+  }
+
+  return (
+    <div
+      className={`searchUser ${isOpenSerch && "searchUser_open"}`}
+      onClick={() => setIsOpenSearch(false)}
+    >
+      <div
+        className={`searchUser__container ${
+          isOpenSerch && "searchUser__container_open"
+        }`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          className="searchUser__close"
+          onClick={() => setIsOpenSearch(false)}
+        >
+          X
+        </button>
+        <div className="searchUser__title">Search Users</div>
+        <SearchUsersInput
+          isOpenSerch={isOpenSerch}
+          setSearchUsers={setSearchUsers}
+          inputSearch={inputSearch}
+          setInputSearch={setInputSearch}
+        />
+
+        {searchUses.map((userData) => {
+          let image;
+          if (!!userData.image?.data) {
+            image = createImageBuffer(userData.image.data.data);
+          } else {
+            image = baseImageUser;
+          }
+
+          return (
+            <div
+              className="searchUser__user"
+              key={userData._id}
+              onClick={() => {
+                const existingChat = chats.find((chat) => {
+                  if (chat.users.length === 2) {
+                    const [{ _id: user1Id }, { _id: user2Id }] = chat.users;
+                    const userIds = [user1Id, user2Id];
+
+                    return (
+                      userIds.includes(userData._id) &&
+                      userIds.includes(user._id)
+                    );
+                  }
+                  return false;
+                });
+
+                if (existingChat) {
+                  setChats((state) => [
+                    existingChat,
+                    ...state.filter((chat) => chat._id !== existingChat._id),
+                  ]);
+                  setSelectedChat(existingChat);
+                  return setIsOpenSearch(false);
+                }
+
+                createChat(userData._id);
+              }}
+            >
+              <div className="searchUser__user-image-container">
+                <img
+                  className="searchUser__user-image"
+                  alt="user-icon"
+                  src={image}
+                />
+              </div>
+              <div className="searchUser__user-data">
+                <div className="searchUser__user-data">
+                  <span className="searchUser__user-data-type">Name: </span>
+                  {userData.name}
+                </div>
+                <div className="searchUser__user-data">
+                  <span className="searchUser__user-data-type">Email: </span>{" "}
+                  {userData.email}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+export default SearchUsers;
+.sidePanel {
+  background-color: transparent;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  box-sizing: border-box;
+  z-index: 1;
+}
+
+.sidePanel__container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: white;
+  padding: 15px 9px;
+  border-radius: 6px;
+}
+
+.sidePanel__search-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  cursor: pointer;
+  position: relative;
+}
+
+.sidePanel__search-clue {
+  position: absolute;
+  white-space: nowrap;
+  left: 0;
+  top: 120%;
+  background-color: rgb(0, 0, 0);
+  padding: 1px 3px;
+  box-sizing: border-box;
+  color: white;
+  font-weight: 100;
+  display: none;
+}
+
+.sidePanel__search-container:hover .sidePanel__search-clue {
+  display: block;
+}
+
+.sidePanel__info-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.sidePanel__search-img {
+  width: 20px;
+  margin-right: 5px;
+}
+
+.sidePanel__letter {
+  height: 40px;
+  margin-right: 20px;
+  cursor: pointer;
+}
+
+.sidePanel__letter:hover {
+  transform: scale(1.1);
+}
+
+.sidePanel__unread {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: rgb(194, 0, 81);
+  color: white;
+  border-radius: 10rem;
+  padding: 0 5px;
+  z-index: 1;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 40%;
+}
+
+.sidePanel__user-info-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 2rem;
+  position: relative;
+}
+
+.sidePanel__user-info-container:hover {
+  background-color: rgba(0, 0, 0, 0.418);
+}
+
+.sidePanel__user-avatar-container {
+  width: 40px;
+  height: 40px;
+  border-radius: 10rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.sidePanel__user-avatar {
+  position: absolute;
+  height: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.sidePanel__arrow {
+  height: 20px;
+  margin-left: 5px;
+}
+
+.sidePanel__user-info-list {
+  list-style-type: none;
+  margin: 0;
+  padding: 1px;
+  box-sizing: border-box;
+  border-radius: 5px;
+  background-color: rgb(255, 255, 255);
+  box-shadow: 0 0 5px 2px gray;
+}
+
+.sidePanel__user-info-list-item {
+  width: 200px;
+  text-align: center;
+  padding: 10px 5px;
+  font-size: 20px;
+  cursor: pointer;
+  border-radius: 1rem;
+}
+
+.sidePanel__user-info-list-item:hover {
+  background-color: gray;
+}
+
+.sidePanel__user-info-list-container {
+  position: absolute;
+  top: calc(100%);
+  right: 0;
+  padding-top: 40px;
+  box-sizing: border-box;
+  display: none;
+}
+
+.sidePanel__user-info-container:hover .sidePanel__user-info-list-container {
+  display: block;
+}
+import React, { useEffect, useMemo, useState } from "react";
+import "./sidePanel.css";
+import SearchIcon from "../../images/search.png";
+import letterIcon from "../../images/envelope.png";
+import downArrowIcon from "../../images/down-arrow.png";
+import Profile from "../Profile/Profile";
+import SearchUsers from "../SearchUsers/SearchUsers";
+import { useNavigate } from "react-router-dom";
+import defaultUser from "../../images/user.png";
+import { createImageBuffer } from "../../utils/createImadeBuffer";
+import { ChatState } from "../../context/chatProvider";
+
+function SidePanel({ user, setPopup }) {
+  const navigation = useNavigate();
+
+  const [isOpenSerch, setIsOpenSearch] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const { unreadMessages } = ChatState();
+
+  const userAvatar = useMemo(
+    () =>
+      !!user.image?.data
+        ? createImageBuffer(user.image.data.data, user.image.contentType)
+        : defaultUser,
+    [user]
+  );
+
+  const userUnreadMessages = useMemo(() => {
+    if (!!!unreadMessages) return;
+    return Object.values(unreadMessages).reduce((accumulator, currentValue) => {
+      return accumulator + currentValue;
+    }, 0);
+  }, [unreadMessages]);
+
+  return (
+    <div className="sidePanel">
+      <SearchUsers
+        isOpenSerch={isOpenSerch}
+        setIsOpenSearch={setIsOpenSearch}
+      />
+      <div className="sidePanel__container">
+        <div
+          className="sidePanel__search-container"
+          onClick={() => setIsOpenSearch(true)}
+        >
+          <img
+            className="sidePanel__search-img"
+            alt="search-icon"
+            src={SearchIcon}
+          ></img>
+          Search User
+          <p className="sidePanel__search-clue">Search User to chat</p>
+        </div>
+
+        <div className="sidePanel__title">GAYSSENGER</div>
+
+        <div className="sidePanel__info-container">
+          <img
+            className="sidePanel__letter"
+            alt="letter-icon"
+            src={letterIcon}
+          />
+          {userUnreadMessages > 0 && (
+            <div className="sidePanel__unread">{userUnreadMessages}</div>
+          )}
+          <div className="sidePanel__user-info-container">
+            <div className="sidePanel__user-avatar-container">
+              <img
+                src={userAvatar}
+                alt="user-avatar"
+                className="sidePanel__user-avatar"
+              />
+            </div>
+            <img
+              src={downArrowIcon}
+              alt="user-avatar"
+              className="sidePanel__arrow"
+            />
+
+            <div className="sidePanel__user-info-list-container">
+              <ul className="sidePanel__user-info-list">
+                <li
+                  className="sidePanel__user-info-list-item"
+                  onClick={() => setIsProfileOpen(true)}
+                >
+                  Profile
+                </li>
+                <li
+                  className="sidePanel__user-info-list-item"
+                  onClick={() => {
+                    localStorage.clear();
+                    navigation("/");
+                  }}
+                >
+                  Logout
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {isProfileOpen && (
+        <Profile
+          user={user}
+          setIsProfileOpen={setIsProfileOpen}
+          setPopup={setPopup}
+        />
+      )}
+    </div>
+  );
+}
+
+export default SidePanel;
+import { createContext, useContext, useEffect, useState } from "react";
+import { UserState } from "./userProvider";
+
+export const ChatContext = createContext();
+
+const ChatProvider = ({ children }) => {
+  const { user } = UserState();
+  const [chats, setChats] = useState([]);
+  const [selectedChat, setSelectedChat] = useState(null);
+  const [chatMessage, setChatMessage] = useState([]);
+  const [unreadMessages, setUnreadMessages] = useState(null);
+
+  useEffect(() => {
+    if (!!!user) return;
+    setUnreadMessages(user.unreadMessages);
+  }, [user]);
+
+  return (
+    <ChatContext.Provider
+      value={{
+        chats,
+        setChats,
+        selectedChat,
+        setSelectedChat,
+        chatMessage,
+        setChatMessage,
+        unreadMessages,
+        setUnreadMessages,
+      }}
+    >
+      {children}
+    </ChatContext.Provider>
+  );
+};
+
+export const ChatState = () => useContext(ChatContext);
+
+export default ChatProvider;
+import { createContext, useContext, useEffect, useState } from "react";
+import { UserContext, UserState } from "./userProvider";
+import { io } from "socket.io-client";
+
+export const SocketContext = createContext();
+
+const SocketProvider = ({ children }) => {
+  const [socket, setSocket] = useState(null);
+  const { user } = UserState();
+
+  useEffect(() => {
+    if (!!!user) return;
+    const newSocket = io("http://localhost:5000");
+    newSocket.emit("setup", user._id);
+    setSocket(newSocket);
+  }, [user]);
+
+  return (
+    <SocketContext.Provider value={{ socket }}>
+      {children}
+    </SocketContext.Provider>
+  );
+};
+
+export const SocketState = () => useContext(SocketContext);
+
+export default SocketProvider;
+import { useEffect } from "react";
+import { createContext, useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { auth } from "../api/api";
+import { resSetUser } from "../utils/resSetUser";
+
+export const UserContext = createContext();
+
+const UserProvider = ({ children }) => {
+  const navigate = useNavigate();
+
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("jwt");
+
+    if (token) {
+      auth()
+        .then((res) => {
+          resSetUser(res, navigate, setUser);
+        })
+        .catch((e) => {
+          console.log(e, "error");
+          localStorage.clear();
+          navigate("/");
+        });
+    } else {
+      navigate("/");
+    }
+  }, []);
+
+  return (
+    <UserContext.Provider value={{ user, setUser }}>
+      {children}
+    </UserContext.Provider>
+  );
+};
+
+export const UserState = () => useContext(UserContext);
+
+export default UserProvider;
+import { useState, useEffect, useRef } from "react";
+
+export default function useComponentVisible(initialIsVisible) {
+  const [isClickOut, setIsClickOut] =
+    useState(initialIsVisible);
+  const ref = useRef(null);
+
+  const handleClickOutside = (event) => {
+    if (ref.current && !ref.current.contains(event.target)) {
+      return setIsClickOut(true);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("click", handleClickOutside, true);
+    return () => {
+      document.removeEventListener("click", handleClickOutside, true);
+    };
+  }, []);
+
+  return { ref, isClickOut, setIsClickOut };
+}
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./components/App/App";
+import { BrowserRouter } from "react-router-dom";
+import UserProvider from "./context/userProvider";
+import ChatProvider from "./context/chatProvider";
+import SocketProvider from "./context/socketProvider";
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(
+  <BrowserRouter>
+    <UserProvider>
+      <SocketProvider>
+        <ChatProvider>
+          <App />
+        </ChatProvider>
+      </SocketProvider>
+    </UserProvider>
+  </BrowserRouter>
+);
+import { createImageBuffer } from "./createImadeBuffer";
+import baseImageUser from "../images/user.png";
+import chatDefault from "../images/chatDefault.png";
+
+export function chatData(chat, user) {
+  let opponent;
+  let image;
+
+  if (!chat.isGroupChat) {
+    const intermediateValue = chat.users.filter(
+      (userData) => userData._id !== user._id
+    );
+
+    if (!!intermediateValue[0]) {
+      opponent = intermediateValue[0];
+    } else {
+      opponent = chat.users[0];
+    }
+
+    if (!!opponent.image?.data) {
+      image = createImageBuffer(opponent.image.data.data);
+    } else {
+      image = baseImageUser;
+    }
+  } else {
+    image = chatDefault;
+  }
+
+  return { image, opponent };
+}
+export function createImageBuffer(arrayBuffer, type) {
+  const blob = new Blob([new Uint8Array(arrayBuffer)], { type: "image/png" });
+  return URL.createObjectURL(blob);
+}
+import { updateTokenAndCreateAxiosInstance } from "../api/api";
+
+export function resSetUser(res, navigate, setUser) {
+  localStorage.setItem("jwt", res.data.token);
+  updateTokenAndCreateAxiosInstance();
+  setUser(res.data);
+  navigate("/chats");
+}
+PORT = 5000
+MONGO_URI = "mongodb://localhost:27017/gayssenger"
+JWT_SECRET = "edfvdgfbhnhgf"const mongoose = require("mongoose");
+
+function connectDB() {
+  mongoose
+    .connect(process.env.MONGO_URI)
+    .then(() => console.log("mongoose connected " + process.env.MONGO_URI))
+    .catch((e) => console.log(e));
+}
+
+module.exports = connectDB;
+const jwt = require("jsonwebtoken");
+
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: "30d",
+  });
+};
+
+module.exports = generateToken;
+ const asyncHandler = require("express-async-handler");
+const Chat = require("../scheme/chatSchema");
+const User = require("../scheme/userschema");
+
+const accessChat = asyncHandler(async (req, res) => {
+  const { userId } = req.body;
+
+  if (!userId) {
+    console.log("UserId param not sent with request");
+    return res.sendStatus(400);
+  }
+
+  let isChat = await Chat.findOne({
+    isGroupChat: false,
+    $and: [
+      { users: { $elemMatch: { $eq: req.user._id } } },
+      { users: { $elemMatch: { $eq: userId } } },
+    ],
+  })
+    .populate("users", "-password")
+    .populate("lastedMessage");
+
+  if (isChat) {
+    isChat = await User.populate(isChat, {
+      path: "lastedMessage.sender",
+      select: "name _id",
+    });
+    return res.send(isChat);
+  }
+
+  try {
+    const createdChat = await Chat.create({
+      chatName: "sender",
+      isGroupChat: false,
+      users: [req.user._id, userId],
+    });
+
+    const fullChat = await Chat.findOne({ _id: createdChat.id }).populate(
+      "users",
+      "-password"
+    );
+    res.status(200).send(fullChat);
+  } catch (e) {
+    res.status(400);
+    throw new Error(error.message);
+  }
+});
+
+const fetchChats = asyncHandler(async (req, res) => {
+  try {
+    const chat = await Chat.find({
+      users: { $elemMatch: { $eq: req.user._id } },
+    })
+      .populate("users", "-password")
+      .populate("groupAdmin", "_id")
+      .populate({
+        path: "lastedMessage",
+        populate: { path: "sender", select: "name _id" },
+      })
+      .sort({
+        lastedMessage: -1,
+      })
+      .then((result) => {
+        res.status(200).send(result);
+      });
+  } catch (error) {
+    res.status(200);
+    throw new Error(error.message);
+  }
+});
+
+const findChat = asyncHandler(async (req, res) => {
+  const { chatId } = req.query;
+
+  try {
+    Chat.findOne({
+      _id: chatId,
+    })
+      .populate("users", "-password")
+      .populate("groupAdmin", "_id")
+      .populate("lastedMessage")
+      .then(async (rersult) => {
+        rersult = await User.populate(rersult, {
+          path: "lastedMessage.sender",
+          select: "name image email",
+        });
+        res.status(200).send(rersult);
+      });
+  } catch (e) {
+    res.status(200);
+    throw new Error(error.message);
+  }
+});
+
+const createGroupChat = asyncHandler(async (req, res) => {
+  if (!req.body.users || !req.body.name) {
+    return res.status(400).send({ message: "Please Fill all the fields" });
+  }
+
+  const users = await User.find({ _id: { $in: JSON.parse(req.body.users) } });
+
+  if (users.length < 2) {
+    return res
+      .status(400)
+      .send("More than 2 users are required to from a group chat");
+  }
+
+  try {
+    const chatGroup = await Chat.create({
+      chatName: req.body.name,
+      users: users,
+      isGroupChat: true,
+      groupAdmin: req.user,
+    });
+
+    await chatGroup.save();
+
+    const fullGroupChat = await Chat.findOne({
+      _id: chatGroup._id,
+    })
+      .populate("users", "-password")
+      .populate("groupAdmin", "_id");
+
+    res.status(200).json(fullGroupChat);
+  } catch (e) {
+    res.status(500);
+    throw new Error(e.message);
+  }
+});
+
+const renameGroup = asyncHandler(async (req, res) => {
+  const { chatId, chatName } = req.body;
+
+  const updateChat = await Chat.findByIdAndUpdate(
+    chatId,
+    {
+      chatName: chatName,
+    },
+    {
+      new: true,
+    }
+  )
+    .populate("users", "-password")
+    .populate("groupAdmin", "_id");
+
+  if (!updateChat) {
+    res.status(404);
+    throw new Error("Chat Not Found");
+  } else {
+    res.json(updateChat);
+  }
+});
+
+const groupRemove = asyncHandler(async (req, res) => {
+  try {
+    const { chatId, userId } = req.body;
+
+    const chat = await Chat.findById(chatId);
+
+    if (
+      !chat.groupAdmin.equals(req.user._id) &&
+      userId !== req.user._id.toString()
+    ) {
+      res.status(403);
+      throw new Error("Only group admin can remove users");
+    }
+
+    const removed = await Chat.findByIdAndUpdate(
+      chatId,
+      {
+        $pull: { users: userId },
+      },
+      { new: true }
+    )
+      .populate("users", "-password")
+      .populate("groupAdmin", "_id");
+
+    const userIds = chat.users.map((user) => user._id.toString());
+
+    if (userIds.length === 0) {
+      await Chat.findByIdAndRemove(chatId);
+    }
+
+    if (!removed) {
+      res.status(404);
+      throw new Error("Chat Not Found");
+    } else {
+      res.json(removed);
+    }
+  } catch (e) {
+    console.log(e);
+  }
+});
+
+const groupAdd = asyncHandler(async (req, res) => {
+  const { chatId, userId } = req.body;
+
+  const added = await Chat.findByIdAndUpdate(
+    chatId,
+    {
+      $push: { users: userId },
+    },
+    { new: true }
+  )
+    .populate("users", "-password")
+    .populate("groupAdmin", "_id");
+
+  if (!added) {
+    res.status(404);
+    throw new Error("Chat Not Found");
+  } else {
+    res.json(added);
+  }
+});
+
+module.exports = {
+  accessChat,
+  fetchChats,
+  createGroupChat,
+  renameGroup,
+  groupRemove,
+  groupAdd,
+  findChat,
+};
+const asyncHandler = require("express-async-handler");
+const Message = require("../scheme/messageSchema");
+const User = require("../scheme/userschema");
+const Chat = require("../scheme/chatSchema");
+
+const sendMassage = asyncHandler(async (req, res) => {
+  const { content, chatId } = req.body;
+
+  if (!content || !chatId) {
+    console.log("Invalid data passed into request");
+    return res.sendStatus(400);
+  }
+
+  try {
+    let message = await Message.create({
+      sender: req.user._id,
+      content: content,
+      chat: chatId,
+    });
+
+    message = await message.populate("sender", "name _id");
+    message = await message.populate("chat");
+    message = await User.populate(message, {
+      path: "chat.users",
+      select: "_id",
+    });
+
+    await Chat.findByIdAndUpdate(chatId, {
+      lastedMessage: message,
+    });
+
+    res.json(message);
+  } catch (e) {
+    res.status(400);
+    throw new Error(e.message);
+  }
+});
+
+const allMassage = asyncHandler(async (req, res) => {
+  const { chatId } = req.params;
+
+  try {
+    const messages = await Message.find({ chat: chatId })
+      .populate("sender", "name _id")
+      .populate("chat");
+
+    res.json(messages);
+
+    await User.findOneAndUpdate(
+      { _id: req.user._id },
+      { $unset: { [`unreadMessages.${chatId}`]: 1 } }
+    );
+  } catch (e) {
+    res.status(400);
+    throw new Error(e.message);
+  }
+});
+module.exports = { sendMassage, allMassage };
+const asyncHandler = require("express-async-handler");
+const generateToken = require("../config/generateToken");
+const { validationResult } = require("express-validator");
+const User = require("../scheme/userschema");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const path = require("path");
+
+const registerUser = asyncHandler(async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(401).json({ errors: errors.array() });
+  }
+
+  const { name, email, password } = req.body;
+
+  const pictureFile = req.file;
+
+  let user = await User.findOne({ email });
+  if (user) {
+    return res
+      .status(409)
+      .json({ message: "User with this email already exists" });
+  }
+  let userImage = null;
+
+  if (!!pictureFile) {
+    userImage = {
+      data: pictureFile.buffer,
+      contentType: pictureFile.mimetype,
+    };
+  }
+
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+
+  user = new User({
+    name,
+    email,
+    password: hashedPassword,
+    image: userImage,
+  });
+
+  await user.save();
+
+  res.status(201).json({
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    image: user.image,
+    token: generateToken(user._id),
+  });
+});
+
+const authUser = asyncHandler(async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await User.findById(decoded.id).select("-password");
+
+      res.status(201).json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        image: user.image,
+        unreadMessages: user.unreadMessages,
+        token: generateToken(user._id),
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(401).json("Invalid token");
+    }
+  } else {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+
+    if (user && (await bcrypt.compare(password, user.password))) {
+      res.status(200).json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        image: user.image,
+        unreadMessages: user.unreadMessages,
+        token: generateToken(user._id),
+      });
+    } else {
+      res.status(401).json("User not found");
+    }
+  }
+});
+
+const allUsers = asyncHandler(async (req, res) => {
+  const { query } = req.query;
+
+  const users = await User.find({
+    $or: [
+      { name: { $regex: query, $options: "i" } },
+      { email: { $regex: query, $options: "i" } },
+    ],
+  });
+
+  res.json(users);
+});
+
+const findUser = asyncHandler(async (req, res) => {
+  const { userId } = req.query;
+
+  const user = await User.findOne({ _id: userId }).select(
+    "-password -unreadMessages"
+  );
+
+  if (!user) {
+    throw new Error("User is not found");
+  }
+
+  res.json(user);
+});
+
+const updateUserAvatar = asyncHandler(async (req, res) => {
+  const pictureFile = req.file;
+
+  if (!pictureFile) {
+    res.status(400);
+    throw new Error("Please upload a file");
+  }
+
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  user.image = {
+    data: pictureFile.buffer,
+    contentType: pictureFile.mimetype,
+  };
+
+  await user.save();
+
+  res.status(200).json({
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    image: user.image,
+    token: generateToken(user._id),
+  });
+});
+
+const updateUserName = asyncHandler(async (req, res) => {
+  const { name, email } = req.body;
+
+  if (!!!name && !!!email) {
+    res.status(400);
+    throw new Error("Please write name or email");
+  }
+
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  if (!!name) {
+    user.name = name;
+  }
+
+  if (!!email) {
+    user.email = email;
+  }
+
+  await user.save();
+
+  res.status(200).json({
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    image: user.image,
+    token: generateToken(user._id),
+  });
+});
+
+module.exports = {
+  registerUser,
+  authUser,
+  allUsers,
+  updateUserAvatar,
+  updateUserName,
+  findUser,
+};
+const express = require("express");
+const connectDB = require("./config/db");
+const dotenv = require("dotenv");
+const userRouters = require("./routes/userRouter");
+const { notFound, errorHandler } = require("./middlewares/errorMiddlewares");
+const chatRoutes = require("./routes/chatRoutes");
+const cors = require("./middlewares/cors");
+const messageRoutes = require("./routes/messageRoutes");
+const socketController = require("./socket/socket");
+
+dotenv.config();
+
+connectDB();
+const app = express();
+app.use(express.json());
+
+app.use(cors);
+
+const PORT = process.env.PORT || 5000;
+
+app.use("/user", userRouters);
+app.use("/chat", chatRoutes);
+app.use("/message", messageRoutes);
+
+app.use(notFound);
+app.use(errorHandler);
+
+const server = app.listen(PORT, console.log("Server started on port " + PORT));
+
+socketController(server);
+const jwt = require("jsonwebtoken");
+const User = require("../scheme/userschema");
+const asyncHandler = require("express-async-handler");
+
+const protect = asyncHandler(async (req, res, next) => {
+  let token;
+
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    try {
+      token = req.headers.authorization.split(" ")[1];
+
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      req.user = await User.findById(decoded.id).select("-password");
+
+      next();
+    } catch (e) {
+      res.status(401);
+      throw new Error("Not authorized, roken failed");
+    }
+  }
+});
+
+module.exports = protect;
+const allowedCors = ["http://localhost:3000"];
+
+module.exports = function cors(req, res, next) {
+  const { origin } = req.headers;
+
+  if (allowedCors.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
+  const { method } = req;
+  const DEFAULT_ALLOWED_METHODS = "GET,HEAD,PUT,PATCH,POST,DELETE";
+  const requestHeaders = req.headers["access-control-request-headers"];
+  if (method === "OPTIONS") {
+    res.header("Access-Control-Allow-Methods", DEFAULT_ALLOWED_METHODS);
+    res.header("Access-Control-Allow-Headers", requestHeaders);
+    return res.end();
+  }
+  return next();
+};
+const notFound = (req, res, next) => {
+  const error = new Error("Not Found - " + req.originalUrl);
+  res.status(404);
+  next(error);
+};
+
+const errorHandler = (err, req, res, next) => {
+  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  res.status(statusCode);
+  res.json({
+    message: err.message,
+  });
+};
+
+module.exports = { notFound, errorHandler };
+const express = require("express");
+const protect = require("../middlewares/authMiddleware");
+const {
+  accessChat,
+  fetchChats,
+  createGroupChat,
+  renameGroup,
+  groupRemove,
+  groupAdd,
+  findChat,
+} = require("../controllers/chatController");
+const { validateRequest } = require("../validation/validateRequest");
+const {
+  chatUpdateNameValidations,
+  chatRemoveUserValidations,
+  findChatValidations,
+} = require("../validation/chatValidations");
+const chatRoutes = express.Router();
+
+chatRoutes.route("/").post(protect, accessChat);
+chatRoutes.route("/").get(protect, fetchChats);
+chatRoutes.route("/group").post(protect, createGroupChat);
+chatRoutes
+  .route("/findGroup")
+  .get(validateRequest(findChatValidations), protect, findChat);
+chatRoutes
+  .route("/rename")
+  .put(validateRequest(chatUpdateNameValidations), protect, renameGroup);
+chatRoutes
+  .route("/groupremove")
+  .put(validateRequest(chatRemoveUserValidations), protect, groupRemove);
+chatRoutes
+  .route("/groupadd")
+  .put(validateRequest(chatRemoveUserValidations), protect, groupAdd);
+
+module.exports = chatRoutes;
+const express = require("express");
+const protect = require("../middlewares/authMiddleware");
+const { sendMassage, allMassage } = require("../controllers/messageController");
+const messageRoutes = express.Router();
+
+messageRoutes.route("/").post(protect, sendMassage);
+messageRoutes.route("/:chatId").post(protect, allMassage);
+
+module.exports = messageRoutes;
+const express = require("express");
+const {
+  registerUser,
+  authUser,
+  allUsers,
+  updateUserAvatar,
+  updateUserName,
+  findUser,
+} = require("../controllers/userController");
+const protect = require("../middlewares/authMiddleware");
+const { validateRequest } = require("../validation/validateRequest");
+const {
+  registerUserValidations,
+  authUserValidations,
+  allUserValidations,
+} = require("../validation/userValidations");
+const multer = require("multer");
+const upload = multer();
+const router = express.Router();
+
+router.post(
+  "/",
+  upload.single("pictureFile"),
+  validateRequest(registerUserValidations),
+  registerUser
+);
+router.post("/login", validateRequest(authUserValidations), authUser);
+router.get("/", validateRequest(allUserValidations), protect, allUsers);
+router.get("/findUser", validateRequest(allUserValidations), protect, findUser);
+router.put("/image", protect, upload.single("pictureFile"), updateUserAvatar);
+router.put(
+  "/update",
+  protect,
+  validateRequest(authUserValidations),
+  updateUserName
+);
+
+module.exports = router;
+const mongoose = require("mongoose");
+
+const chatModel = mongoose.Schema(
+  {
+    chatName: { type: String, trim: true },
+    isGroupChat: { type: Boolean, default: false },
+    users: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    lastedMessage: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Message",
+    },
+    groupAdmin: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+const Chat = mongoose.model("Chat", chatModel);
+
+module.exports = Chat;
+const mongoose = require("mongoose");
+
+const messageModel = mongoose.Schema(
+  {
+    sender: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    content: { type: String, trim: true },
+    chat: { type: mongoose.Schema.Types.ObjectId, ref: "Chat" },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+const Message = mongoose.model("Message", messageModel);
+
+module.exports = Message;
+const mongoose = require("mongoose");
+
+const userSchema = mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    image: {
+      data: Buffer,
+      contentType: String,
+    },
+    unreadMessages: {
+      type: Object,
+      default: {},
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+const User = mongoose.model("User", userSchema);
+
+module.exports = User;
+const io = require("socket.io");
+const Chat = require("../scheme/chatSchema");
+const User = require("../scheme/userschema");
+
+async function searchUsersChat(chatId) {
+  const chat = await Chat.findById(chatId);
+
+  if (!chat) {
+    return [];
+  }
+
+  return chat.users.map((user) => user._id.toString());
+}
+
+function socketController(server) {
+  const socket = io(server, {
+    pingTimeout: 60000,
+    cors: {
+      origin: "http://localhost:3000",
+    },
+  });
+
+  socket.on("connection", (socket) => {
+    socket.on("setup", (userId) => {
+      socket.join(userId);
+    });
+
+    socket.on("joinChat", (chatId) => {
+      socket.join(chatId);
+    });
+
+    socket.on("leaveChat", (chatId) => {
+      socket.leave(chatId);
+    });
+
+    socket.on("renameChat", async ({ newName, chatId }) => {
+      const userIds = await searchUsersChat(chatId);
+
+      userIds.forEach((user) => {
+        socket.broadcast.to(user).emit("newChatName", { newName, chatId });
+      });
+    });
+
+    socket.on("removeUserChat", async ({ userId, chatId }) => {
+      const userIds = await searchUsersChat(chatId);
+
+      userIds.push(userId);
+
+      userIds.forEach((user) => {
+        socket.broadcast.to(user).emit("deleteUserChat", { userId, chatId });
+      });
+    });
+
+    socket.on("addUserChat", async ({ userId, chatId }) => {
+      const userIds = await searchUsersChat(chatId);
+
+      userIds.forEach((user) => {
+        socket.broadcast.to(user).emit("addUsersChat", { userId, chatId });
+      });
+    });
+
+    socket.on("newMessage", async (message) => {
+      try {
+        const {
+          chat: { _id: chatId },
+        } = message;
+
+        const userIds = await searchUsersChat(chatId);
+
+        userIds.forEach((user) => {
+          socket.broadcast.to(user).emit("message", message);
+        });
+
+        const usersInRoom = Array.from(socket.adapter.rooms.get(chatId) || []);
+
+        const usersToAddUnreadMessages = userIds.filter(
+          (user) =>
+            !usersInRoom.includes(
+              socket.adapter.rooms.get(user) &&
+                socket.adapter.rooms.get(user).values().next().value
+            )
+        );
+
+        usersToAddUnreadMessages.forEach(async (user) => {
+          const existingUser = await User.findById(user);
+
+          existingUser.unreadMessages = {
+            ...existingUser.unreadMessages,
+            [chatId]: (existingUser.unreadMessages[chatId] || 0) + 1,
+          };
+
+          await existingUser.save();
+        });
+      } catch (e) {
+        console.log(e);
+      }
+    });
+
+    socket.on("typingMessage", async (chatUserDate) => {
+      const { chatId } = chatUserDate;
+
+      socket.broadcast.to(chatId).emit("userTyping", chatUserDate);
+    });
+  });
+}
+
+module.exports = socketController;
+const { body } = require("express-validator");
+
+const chatUpdateNameValidations = [
+  body("chatId").notEmpty().withMessage("ChatId is required"),
+  body("chatName")
+    .notEmpty()
+    .isLength({ min: 2, max: 30 })
+    .withMessage("Name is required and must be between 2 and 30 characters"),
+];
+
+const chatRemoveUserValidations = [
+  body("chatId").notEmpty().withMessage("ChatId is required"),
+  body("userId").notEmpty().withMessage("UserId is required"),
+];
+
+const findChatValidations = [body("query").notEmpty()];
+
+module.exports = {
+  chatUpdateNameValidations,
+  chatRemoveUserValidations,
+  findChatValidations,
+};
+const { body } = require("express-validator");
+
+const registerUserValidations = [
+  body("name").notEmpty().withMessage("Name is required"),
+  body("email")
+    .notEmpty()
+    .withMessage("Email is required")
+    .isEmail()
+    .withMessage("Invalid email"),
+  body("password")
+    .notEmpty()
+    .withMessage("Password is required")
+    .isLength({ min: 4, max: 30 })
+    .withMessage("Password must be between  and 30 characters long"),
+];
+
+const authUserValidations = [
+  body("email")
+    .notEmpty()
+    .withMessage("Email is required")
+    .isEmail()
+    .withMessage("Invalid email"),
+  body("password")
+    .notEmpty()
+    .withMessage("Password is required")
+    .isLength({ min: 4, max: 30 })
+    .withMessage("Password must be between 4 and 30 characters long"),
+];
+
+const allUserValidations = [body("query").notEmpty()];
+
+module.exports = {
+  registerUserValidations,
+  authUserValidations,
+  allUserValidations,
+};
+const { validationResult, body } = require("express-validator");
+
+function validateRequest(validations) {
+  return async (req, res, next) => {
+    await Promise.all(validations.map((validation) => validation.run(req)));
+    next();
+  };
+}
+
+module.exports = {
+  validateRequest,
+};
